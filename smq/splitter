@@ -1,0 +1,32 @@
+# -*- mode: ruby; -*-
+# split out retweeted tweets where contained in retweet
+class Processor
+  # def process(tweet)
+  #   flag = false
+  #   if rt = tweet["retweeted_status"]
+  #     if txt = rt["text"]
+  #       if txt =~ /http:/
+  #         flag = true
+  #         output_queue.put rt.to_json
+  #         counters[:out][output_queue.name] += 1
+  #       end
+  #     end
+  #   end
+  #   if tweet["text"]
+  #     if tweet["text"] =~ /http:/ or flag
+  #       tweet
+  #     end
+  #   end
+  # end
+
+  def process(tweet)
+    if rt = tweet["retweeted_status"]
+      output_queue.put rt.to_json
+      counters[:out][output_queue.name] += 1
+    end
+    if tweet["text"]
+      tweet
+    end
+  end
+
+end

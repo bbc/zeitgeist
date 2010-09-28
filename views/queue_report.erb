@@ -1,0 +1,131 @@
+<style>
+body {
+	font-family: "Trebuchet MS", Verdana, Arial, Helvetica,sans-serif;
+/*	color: #6D929B; */
+	color: #444;
+}
+
+th {
+	font: bold 11px "Trebuchet MS", Verdana, Arial, Helvetica,
+	sans-serif;
+	color: #444;
+/*	color: #6D929B; */
+	border-right: 1px solid #C1DAD7;
+	border-bottom: 1px solid #C1DAD7;
+	border-top: 1px solid #C1DAD7;
+	letter-spacing: 2px;
+	text-transform: uppercase;
+	text-align: left;
+	padding: 6px 6px 6px 12px;
+	background: #CAE8EA url(images/bg_header.jpg) no-repeat;
+}
+
+th.nobg {
+	border-top: 0;
+	border-left: 0;
+	border-right: 1px solid #C1DAD7;
+	background: none;
+}
+
+th.spec {
+	border-left: 1px solid #C1DAD7;
+	border-top: 0;
+	background: #fff url(images/bullet1.gif) no-repeat;
+	font: bold 10px "Trebuchet MS", Verdana, Arial, Helvetica,
+	sans-serif;
+}
+
+th.specalt {
+	border-left: 1px solid #C1DAD7;
+	border-top: 0;
+	background: #f5fafa url(images/bullet2.gif) no-repeat;
+	font: bold 10px "Trebuchet MS", Verdana, Arial, Helvetica,
+	sans-serif;
+	color: #444;
+
+/*	color: #B4AA9D; */
+}
+
+td {
+	border-right: 1px solid #C1DAD7;
+	border-bottom: 1px solid #C1DAD7;
+	background: #fff;
+	padding: 6px 6px 6px 12px;
+/*	color: #6D929B; */
+	color: #444;
+}
+
+
+td.alt {
+	background: #F5FAFA;
+/*	color: #B4AA9D; */
+	color: #444;
+}
+
+.page-heading {
+float: left;
+}
+
+.last-updated {
+display: block;
+float: right;
+}
+
+.clear {
+  clear: both;
+}
+</style>
+
+<h1 class="page-heading">Twitter Zeitgeist Pipeline Report</h1>
+<p class="last-updated">Last updated: <span data-date="<%= date.xmlschema %>" class="date"><%= DateFormat.format_datetime(date) %></span> UTC</p>
+<div class="clear">
+<p><a href="/admin">up</a></p>
+<table>
+  <thead>
+    <tr>
+      <th class="queue">queue</th>
+      <th class="message_count">message backlog</th>
+      <th class="consumer_count">consumer count</th>
+      <%# note in/out are swapped because here we're looking from a queue's point of view, whereas stats are generated from a process's POV %>
+      <th class="messages_out">messages in</th>
+      <th class="messages_in">messages out</th>
+      <% processes.each do |host, reports| %>
+      <% reports.each do |name, report| %>
+      <% dbg :report_in_html, report %>
+      <th class="host"><%= host %> <%= name %></th>
+      <% end %>
+      <% end %>
+    </tr>
+  </thead>
+  <tbody>
+    <% rows.each do |row| %>
+    <tr>
+      <td class="queue"><%= row[:queue] %></td>
+      <td class="message_count"><%= row[:message_count] %></td>
+      <td class="consumer_count"><%= row[:consumer_count] %></td>
+      <td class="messages_out"><%= row[:out] %></td>
+      <td class="messages_in"><%= row[:in] %></td>
+      <% processes.each do |host, reports| %>
+      <% reports.each do |name, report| %>
+      <td class="host">
+        <% if report["data"]["in"].keys.include?(row[:queue]) %>
+        <div class="process_in">in: <%= report["data"]["in"][row[:queue]] %></div>
+        <% end %>
+        <% if report["data"]["out"].keys.include?(row[:queue]) %>
+        <div class="process_out">out: <%= report["data"]["out"][row[:queue]] %></div>
+        <% end %>
+      </td>
+      <% end %>
+      <% end %>
+    </tr>
+    <% end %>
+  </tbody>
+</table>
+</div>
+
+<script>
+function reloader() {
+  window.location = window.location;
+}
+window.setInterval(reloader, 1000 * 300); // every 5 minutes
+</script>

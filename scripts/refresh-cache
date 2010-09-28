@@ -1,0 +1,21 @@
+#!/bin/sh
+unset http_proxy
+
+if [ "$HOST" = "" ]; then
+    HOST=http://127.0.0.1
+fi
+if [ "$SLEEP" = "" ]; then
+    SLEEP=30
+fi
+
+while true; do
+    echo
+    echo /zeitgeist
+    echo 
+    curl --header 'accept-encoding: gzip' -0 -D /dev/tty $HOST/zeitgeist >/dev/null
+    echo
+    echo /zeitgeist/by_week
+    echo
+    curl --header 'accept-encoding: gzip' -0 -D /dev/tty $HOST/zeitgeist/by_week >/dev/null
+    sleep $SLEEP
+done

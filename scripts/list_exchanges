@@ -1,0 +1,2 @@
+#!/bin/sh
+sudo /usr/sbin/rabbitmqctl list_exchanges | egrep -v "(^Listing )|(^\.{3}done)" | sort

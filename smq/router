@@ -1,0 +1,30 @@
+# -*- mode: ruby; -*-
+# route all non-tweet messages to out of band queue (e.g. deletes)
+class Processor
+  has :twitter_command_queue_name, :kind => String do
+    default { queue_configuration[:twitter_command][:name] }
+  end
+
+  has :twitter_command_queue do
+    init do
+      key = :twitter_command
+      if !queue_configuration.key?(key)
+        raise ArgumentError, "Output queue #{key} not in config file #{config}"
+      end
+      name = twitter_command_queue_name
+      SMQueue.new(:configuration => queue_configuration[key].merge(:logger => logger, :name => name))
+    end
+  end
+
+  def process(tweet)
+    if tweet["text"]
+      tweet
+    else
+      # FIXME: should not have to switch between levels of
+      # representation (e.g. #to_json here)
+      twitter_command_queue.put tweet.to_json
+      # signal that we don't want to continue processing
+      nil
+    end
+  end
+end

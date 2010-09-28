@@ -1,0 +1,27 @@
+# -*- mode: ruby; -*-
+# strip out unused key:value pairs
+class Processor
+  USER_DELETE_KEYS  = [
+                       "profile_background_color",
+                       "profile_background_image_url",
+                       "profile_background_tile",
+                       # "profile_image_url",
+                       "profile_link_color",
+                       "profile_sidebar_border_color",
+                       "profile_sidebar_fill_color",
+                       "profile_text_color",
+                      ]
+
+  def process(tweet)
+    if tweet["text"]
+      if user = tweet["user"]
+        USER_DELETE_KEYS.each do |key|
+          user.delete(key)
+        end
+        tweet["user"] = user
+      end
+      tweet
+    end
+  end
+
+end

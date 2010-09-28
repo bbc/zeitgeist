@@ -1,0 +1,15 @@
+---
+pid: tmp/pids/thin.pid
+rackup: config.ru
+wait: 30
+timeout: 30
+log: log/thin.log
+max_conns: 1024
+require: []
+
+max_persistent_conns: 512
+environment: production
+daemonize: true
+servers: 5
+socket: /tmp/thin.zeitgeist.sock
+chdir: /var/www/webapps/zeitgeist

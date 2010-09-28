@@ -1,0 +1,22 @@
+#
+# bridge_track_bbc.yml
+#
+# Route input to tweet stream or deletes.
+#
+# To load:
+#     sudo scripts/bpload.rb bluepill_config/router.yml
+#
+:group: router
+:deploy:
+- rad0504
+:tempdir: /tmp
+:logdir: /tmp
+:processes:
+- :name: router
+  :count: 4
+  :cmd:
+    :smq: router
+  :args:
+    :input: twitter_sample_raw
+    :output: twitter_sample
+    :enable_reporting: ""

@@ -1,0 +1,21 @@
+#
+# bridge_track_bbc.yml
+#
+# Bridge input from track input queue.
+#
+# To load:
+#     sudo scripts/bpload.rb bluepill_config/bridge_track_bbc.yml
+#
+:group: bridge_track_bbc
+:deploy:
+- rad0504
+:tempdir: /tmp
+:logdir: /tmp
+:processes:
+- :name: bridge_track_bbc
+  :cmd:
+    :smq: process_bridge
+  :args:
+    :input: twitter_track
+    :output: twitter_sample_raw
+    :enable_reporting: ""

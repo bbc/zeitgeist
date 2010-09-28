@@ -1,0 +1,15 @@
+#!/usr/bin/env ruby
+# delete queue on AMQP host
+require File.join(File.dirname(__FILE__), '../lib/load_paths')
+require 'bunny'
+
+if ARGV.size != 2
+  abort "usage: delete_queue host queue_name"
+end
+
+host = ARGV[0]
+queue = ARGV[1]
+
+mq = Bunny.new(:host => host)
+mq.start
+mq.queue(queue).delete

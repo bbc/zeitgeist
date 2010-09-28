@@ -1,0 +1,507 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+lang="en" xml:lang="en">
+<head>
+<title>BBC R&D Zeitgeist: Background processes</title>
+<meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2010-09-28 15:42:10 BST"/>
+<meta name="author" content="Sean O'Halpin"/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #add8e6; font-weight:normal }
+  .target { }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top; }
+  dt { font-weight: bold; }
+  div.figure { padding: 0.5em; }
+  div.figure p { text-align: center; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size:smaller }
+  .code-highlighted {background-color:#ffff00;}
+  .org-info-js_info-navigation { border-style:none; }
+  #org-info-js_console-label { font-size:10px; font-weight:bold;
+                               white-space:nowrap; }
+  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                 font-weight:bold; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="css/org.css" />
+<link rel="stylesheet" type="text/css" href="css/norang.css" />
+<link rel="stylesheet" type="text/css" href="css/code.css" />
+<script type="text/javascript">
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+
+</head>
+<body>
+<div id="content">
+
+<h1 class="title">BBC R&amp;D Zeitgeist: Background processes</h1>
+
+<p><div class="HEADER">
+</div>
+</p>
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">Starting, stopping and restarting all background processes </a></li>
+<li><a href="#sec-2">Controlling background processes </a>
+<ul>
+<li><a href="#sec-2_1">Start all background processes for host </a></li>
+<li><a href="#sec-2_2">Start up a specific process group </a></li>
+<li><a href="#sec-2_3">Stop process groups </a></li>
+<li><a href="#sec-2_4">Restart process groups </a></li>
+</ul>
+</li>
+<li><a href="#sec-3">Configuring background processes </a>
+<ul>
+<li><a href="#sec-3_1">Process group configuration </a></li>
+<li><a href="#sec-3_2">Command options </a>
+<ul>
+<li><a href="#sec-3_2_1">args </a></li>
+<li><a href="#sec-3_2_2">queue definitions </a></li>
+<li><a href="#sec-3_2_3">params </a></li>
+</ul></li>
+</ul>
+</li>
+<li><a href="#sec-4">Log files </a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1">Starting, stopping and restarting all background processes </h2>
+<div class="outline-text-2" id="text-1">
+
+
+<p>
+To start/stop/restart all process groups specified for this host, use:
+</p>
+
+
+<pre class="src src-sh">$ sudo bg/start all
+$ sudo bg/stop all
+$ sudo bg/restart all
+</pre>
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2">Controlling background processes </h2>
+<div class="outline-text-2" id="text-2">
+
+
+<p>
+The scripts that control process groups are in the <code>./bg</code>
+subdirectory.
+</p>
+<p>
+You should run these scripts as <code>sudo</code> from the root directory of the
+project.
+</p>
+
+</div>
+
+<div id="outline-container-2_1" class="outline-3">
+<h3 id="sec-2_1">Start all background processes for host </h3>
+<div class="outline-text-3" id="text-2_1">
+
+
+<p>
+To start up all process groups specified for this host, use:
+</p>
+
+
+<pre class="src src-sh">$ sudo bg/start all
+</pre>
+
+
+
+<p>
+The list of processes to start is specified in
+<code>smq_config/groups_&lt;hostname&gt;.yml</code> where <code>&lt;hostname&gt;</code> is the current
+host's name as returned by <code>hostname</code>. For example, on <code>rad0407</code> the
+file is called <code>bg/groups_rad0407.yml</code>.
+</p>
+<p>
+The format of the file is as follows:
+</p>
+
+
+
+<pre class="src src-yaml"><span style="color: #dda0dd; background-color: #000000;">:groups:
+</span>- bitly_links
+- find_links
+- splitter
+</pre>
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-2_2" class="outline-3">
+<h3 id="sec-2_2">Start up a specific process group </h3>
+<div class="outline-text-3" id="text-2_2">
+
+
+<p>
+To start up a specific process group or groups, use:
+</p>
+
+
+<pre class="src src-sh">$ sudo bg/start &lt;group1&gt; [&lt;group2&gt; ...]
+</pre>
+
+
+
+<p>
+For example:
+</p>
+
+
+<pre class="src src-sh">$ sudo bg/start bitly_links find_links
+</pre>
+
+
+<p>
+starts the <code>bitly_links</code> and <code>find_links</code> process groups.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2_3" class="outline-3">
+<h3 id="sec-2_3">Stop process groups </h3>
+<div class="outline-text-3" id="text-2_3">
+
+
+<p>
+To stop all background processes, use:
+</p>
+
+
+<pre class="src src-sh">$ sudo bg/stop all
+</pre>
+
+
+
+<p>
+To stop specific process groups, specify the groups. For example:
+</p>
+
+
+<pre class="src src-sh">$ sudo bg/stop bitly_links find_links
+</pre>
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-2_4" class="outline-3">
+<h3 id="sec-2_4">Restart process groups </h3>
+<div class="outline-text-3" id="text-2_4">
+
+
+<p>
+To restart all background processes, use:
+</p>
+
+
+<pre class="src src-sh">$ sudo bg/restart all
+</pre>
+
+
+
+<p>
+To restart specific process groups, specify the groups. For example:
+</p>
+
+
+<pre class="src src-sh">$ sudo bg/restart bitly_links find_links
+</pre>
+
+
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-3" class="outline-2">
+<h2 id="sec-3">Configuring background processes </h2>
+<div class="outline-text-2" id="text-3">
+
+
+<p>
+The background processes that filter the Twitter stream are run as
+groups of related processes under <code>bluepill</code>. These <i>process groups</i>
+can be started and stopped as groups.
+</p>
+<p>
+A process group and the processes which belong to it is defined in its
+<code>./smq_config/&lt;process_group_name&gt;.yml</code> configuration file.
+</p>
+
+</div>
+
+<div id="outline-container-3_1" class="outline-3">
+<h3 id="sec-3_1">Process group configuration </h3>
+<div class="outline-text-3" id="text-3_1">
+
+
+<p>
+This the process group configuration for the <code>bitly_links</code> process
+group. It contains two process definitions, for the
+<code>resolve_bitly_links</code> process and the <code>resolve_long_links</code> process:
+</p>
+
+
+
+<pre class="src src-yaml"><span style="color: #dda0dd; background-color: #000000;">:group: </span>bitly_links
+<span style="color: #dda0dd; background-color: #000000;">:deploy:
+</span>- rad0407
+- rad0505
+<span style="color: #dda0dd; background-color: #000000;">:tempdir: </span>/tmp
+<span style="color: #dda0dd; background-color: #000000;">:logdir: </span>/tmp
+<span style="color: #dda0dd; background-color: #000000;">:processes:
+- :name: </span>bitly_links
+<span style="color: #dda0dd; background-color: #000000;">  :count: </span>4
+<span style="color: #dda0dd; background-color: #000000;">  :cmd:
+    :smq: </span>resolve_bitly_links
+<span style="color: #dda0dd; background-color: #000000;">  :args:
+    :input: </span>bitly
+<span style="color: #dda0dd; background-color: #000000;">    :output: </span>unresolved_links
+<span style="color: #dda0dd; background-color: #000000;">- :name: </span>resolve_long_links
+<span style="color: #dda0dd; background-color: #000000;">  :count: </span>12
+<span style="color: #dda0dd; background-color: #000000;">  :cmd:
+    :smq: </span>resolve_long_links.rb
+<span style="color: #dda0dd; background-color: #000000;">  :args:
+    :input: </span>unresolved_links
+<span style="color: #dda0dd; background-color: #000000;">    :output: </span>twitter_links
+<span style="color: #dda0dd; background-color: #000000;">  :params:
+    :timeout: </span>5
+</pre>
+
+
+
+<p>
+The file consists of configuration options for the process group as a
+whole, then the individual process definitions.
+</p>
+<p>
+The process group options are:
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<caption></caption>
+<colgroup><col align="left" /><col align="left" /><col align="left" />
+</colgroup>
+<thead>
+<tr><th scope="col">Key</th><th scope="col">Description</th><th scope="col">Example</th></tr>
+</thead>
+<tbody>
+<tr><td>:group:</td><td>process group name</td><td><code>bitly_links</code></td></tr>
+<tr><td>:deploy:</td><td>where this script is deployed (info only)</td><td></td></tr>
+<tr><td>:tempdir:</td><td>pid file directory</td><td><code>/tmp</code></td></tr>
+<tr><td>:logdir:</td><td>log file directory</td><td><code>/tmp</code></td></tr>
+<tr><td>:processes:</td><td>List of process definitions</td><td>See below</td></tr>
+</tbody>
+</table>
+
+
+<p>
+The individual process options are:
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<caption></caption>
+<colgroup><col align="left" /><col align="left" /><col align="left" />
+</colgroup>
+<thead>
+<tr><th scope="col">Key</th><th scope="col">Description</th><th scope="col">Example</th></tr>
+</thead>
+<tbody>
+<tr><td>:name:</td><td>process name - displayed by bg/status</td><td><code>bitly_links</code></td></tr>
+<tr><td>:count:</td><td>how many processes to start</td><td>4</td></tr>
+<tr><td>:cmd:</td><td>the command to start</td><td>See below</td></tr>
+<tr><td>:args:</td><td>command line args</td><td>See below</td></tr>
+</tbody>
+</table>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-3_2" class="outline-3">
+<h3 id="sec-3_2">Command options </h3>
+<div class="outline-text-3" id="text-3_2">
+
+
+<p>
+The <code>:cmd:</code> option can be either a string containing the full command
+to be executed, e.g.
+</p>
+<pre class="example">
+:cmd: ruby smq/twitter_oauth.rb twitter_oauth_sample.yml
+</pre>
+
+
+<p>
+or an <code>smq</code> command. An <code>smq</code> command is run using the <code>scripts/smq</code>
+script wrapper. The options are:
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<caption></caption>
+<colgroup><col align="left" /><col align="left" />
+</colgroup>
+<tbody>
+<tr><td>:smq:</td><td>specifies which script (in <code>./smq</code>) to run</td></tr>
+<tr><td>:args:</td><td>list of keyword args to the <code>smq</code> wrapper script</td></tr>
+<tr><td>:params:</td><td>list of keyword args to the specific <code>smq</code> processor</td></tr>
+</tbody>
+</table>
+
+
+
+</div>
+
+<div id="outline-container-3_2_1" class="outline-4">
+<h4 id="sec-3_2_1">args </h4>
+<div class="outline-text-4" id="text-3_2_1">
+
+
+<p>
+Typically, the <code>:args</code> option specifies the input and output queue
+definitions. In the example above, the input queue for the
+<code>bitly_links</code> process is <code>bitly</code> and the output queue is
+<code>unresolved_links</code>.
+</p>
+<p>
+You can see the full list of <code>:args:</code> options by running:
+</p>
+
+
+<pre class="src src-sh">$ scripts/smq --help
+</pre>
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-3_2_2" class="outline-4">
+<h4 id="sec-3_2_2">queue definitions </h4>
+<div class="outline-text-4" id="text-3_2_2">
+
+
+<p>
+Queues are configured in <code>./config/mq.yml</code>. The <code>bitly</code> queue is
+defined in <code>config/mq.yml</code> as:
+</p>
+
+
+
+<pre class="src src-yaml"><span style="color: #dda0dd; background-color: #000000;">:bitly:
+  :adapter: </span>bunny
+<span style="color: #dda0dd; background-color: #000000;">  :name: </span>twitter.links.bitly
+</pre>
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-3_2_3" class="outline-4">
+<h4 id="sec-3_2_3">params </h4>
+<div class="outline-text-4" id="text-3_2_3">
+
+
+<p>
+The <code>:params:</code> option is for smq <i>processor</i> specific options. For
+example, the <code>smq/resolve_long_links.rb</code> processor has an option to
+set the timeout:
+</p>
+
+
+
+<pre class="src src-ruby"><span style="color: #db7093; background-color: #000000;">class</span> <span style="color: #dda0dd; background-color: #000000;">Processor</span>
+  has <span style="color: #dda0dd; background-color: #000000;">:timeout</span>, <span style="color: #dda0dd; background-color: #000000;">:default</span> =&gt; 3
+</pre>
+
+
+
+<p>
+This is set using the <code>:params:</code> option as above.
+</p>
+</div>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-4" class="outline-2">
+<h2 id="sec-4">Log files </h2>
+<div class="outline-text-2" id="text-4">
+
+
+<p>
+All log files are currently stored in <code>/tmp</code>. The directory used is
+specified in each process group definition file in the <code>./smq_config</code>
+directory.
+</p></div>
+</div>
+<div id="postamble">
+</div>
+</div>
+</body>
+</html>

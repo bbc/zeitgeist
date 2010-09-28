@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+lang="en" xml:lang="en">
+<head>
+<title>BBC R&D Zeitgeist: README</title>
+<meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2010-09-28 15:41:54 BST"/>
+<meta name="author" content="Sean O'Halpin"/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #add8e6; font-weight:normal }
+  .target { }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top; }
+  dt { font-weight: bold; }
+  div.figure { padding: 0.5em; }
+  div.figure p { text-align: center; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size:smaller }
+  .code-highlighted {background-color:#ffff00;}
+  .org-info-js_info-navigation { border-style:none; }
+  #org-info-js_console-label { font-size:10px; font-weight:bold;
+                               white-space:nowrap; }
+  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                 font-weight:bold; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="css/org.css" />
+<link rel="stylesheet" type="text/css" href="css/norang.css" />
+<link rel="stylesheet" type="text/css" href="css/code.css" />
+<script type="text/javascript">
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+
+</head>
+<body>
+<div id="content">
+
+<h1 class="title">BBC R&amp;D Zeitgeist: README</h1>
+
+<p><div class="HEADER">
+</div>
+</p>
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">Directory layout </a></li>
+<li><a href="#sec-2">Getting started </a>
+<ul>
+<li><a href="#sec-2_1">Installing </a></li>
+<li><a href="#sec-2_2">Cheat sheet </a></li>
+<li><a href="#sec-2_3">Background processes </a></li>
+<li><a href="#sec-2_4">Configuration </a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1">Directory layout </h2>
+<div class="outline-text-2" id="text-1">
+
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<caption></caption>
+<colgroup><col align="left" /><col align="left" />
+</colgroup>
+<thead>
+<tr><th scope="col">directory</th><th scope="col">description</th></tr>
+</thead>
+<tbody>
+<tr><td>./app</td><td>web app files</td></tr>
+<tr><td>./app/models</td><td>db model files</td></tr>
+<tr><td>./bg</td><td>background process management scripts</td></tr>
+<tr><td>./config</td><td>configuration files</td></tr>
+<tr><td>./doc</td><td>docs</td></tr>
+<tr><td>./install</td><td>install scripts</td></tr>
+<tr><td>./lib</td><td>shared ruby files</td></tr>
+<tr><td>./public</td><td>static web files</td></tr>
+<tr><td>./scripts</td><td>message processor scripts</td></tr>
+<tr><td>./smq</td><td>message queue processor scripts</td></tr>
+<tr><td>./smq_config</td><td>message queue processor configuration files</td></tr>
+<tr><td>./tmp</td><td>temp files inc. thin pids and auto-generated bluepill loader config files</td></tr>
+<tr><td>./var</td><td>used for local storage</td></tr>
+<tr><td>./vendor</td><td>gems that should not be installed with gem (because they contain patches, etc.)</td></tr>
+<tr><td>./views</td><td>web app view templates</td></tr>
+</tbody>
+</table>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2">Getting started </h2>
+<div class="outline-text-2" id="text-2">
+
+
+
+</div>
+
+<div id="outline-container-2_1" class="outline-3">
+<h3 id="sec-2_1">Installing </h3>
+<div class="outline-text-3" id="text-2_1">
+
+
+<p>
+Read <a href="./installation.html">installation</a>.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2_2" class="outline-3">
+<h3 id="sec-2_2">Cheat sheet </h3>
+<div class="outline-text-3" id="text-2_2">
+
+
+<p>
+See the <a href="./runbook.html">runbook</a> for the commands you'll need most often.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2_3" class="outline-3">
+<h3 id="sec-2_3">Background processes </h3>
+<div class="outline-text-3" id="text-2_3">
+
+
+<p>
+See <a href="./background-processes.html">background processes</a> for detailed information on the background
+message processors and how to configure them.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2_4" class="outline-3">
+<h3 id="sec-2_4">Configuration </h3>
+<div class="outline-text-3" id="text-2_4">
+
+
+<p>
+See <a href="./configuration.html">configuration</a> for details on configuration.
+</p>
+</div>
+</div>
+</div>
+<div id="postamble">
+</div>
+</div>
+</body>
+</html>

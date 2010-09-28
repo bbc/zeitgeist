@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+lang="en" xml:lang="en">
+<head>
+<title>BBC R&D Zeitgeist: Runbook</title>
+<meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2010-09-28 15:41:50 BST"/>
+<meta name="author" content="Sean O'Halpin"/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #add8e6; font-weight:normal }
+  .target { }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top; }
+  dt { font-weight: bold; }
+  div.figure { padding: 0.5em; }
+  div.figure p { text-align: center; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size:smaller }
+  .code-highlighted {background-color:#ffff00;}
+  .org-info-js_info-navigation { border-style:none; }
+  #org-info-js_console-label { font-size:10px; font-weight:bold;
+                               white-space:nowrap; }
+  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                 font-weight:bold; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="css/org.css" />
+<link rel="stylesheet" type="text/css" href="css/norang.css" />
+<link rel="stylesheet" type="text/css" href="css/code.css" />
+<script type="text/javascript">
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+
+</head>
+<body>
+<div id="content">
+
+<h1 class="title">BBC R&amp;D Zeitgeist: Runbook</h1>
+
+<p><div class="HEADER">
+</div>
+</p>
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">Background jobs </a>
+<ul>
+<li><a href="#sec-1_1">Get status of background jobs </a></li>
+<li><a href="#sec-1_2">Start/restart/stop background jobs </a></li>
+<li><a href="#sec-1_3">Start/restart/stop specific job </a></li>
+<li><a href="#sec-1_4">View log files </a></li>
+</ul>
+</li>
+<li><a href="#sec-2">Website </a>
+<ul>
+<li><a href="#sec-2_1">Restart thin servers </a></li>
+<li><a href="#sec-2_2">Restart nginx </a></li>
+</ul>
+</li>
+<li><a href="#sec-3">More info </a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1">Background jobs </h2>
+<div class="outline-text-2" id="text-1">
+
+
+
+</div>
+
+<div id="outline-container-1_1" class="outline-3">
+<h3 id="sec-1_1">Get status of background jobs </h3>
+<div class="outline-text-3" id="text-1_1">
+
+
+
+
+
+<pre class="src src-sh">$ cd /var/www/webapps/zeitgeist
+$ sudo bg/status
+</pre>
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-1_2" class="outline-3">
+<h3 id="sec-1_2">Start/restart/stop background jobs </h3>
+<div class="outline-text-3" id="text-1_2">
+
+
+
+
+
+<pre class="src src-sh">$ cd /var/www/webapps/zeitgeist
+$ sudo bg/start all
+$ sudo bg/restart all
+$ sudo bg/stop all
+</pre>
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-1_3" class="outline-3">
+<h3 id="sec-1_3">Start/restart/stop specific job </h3>
+<div class="outline-text-3" id="text-1_3">
+
+
+
+
+
+<pre class="src src-sh">$ cd /var/www/webapps/zeitgeist
+$ sudo bg/stop bbc_links
+</pre>
+
+
+
+<p>
+Be careful about stopping jobs - queues can fill up very quickly and
+crash rabbitmq by causing it to run out of memory.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-1_4" class="outline-3">
+<h3 id="sec-1_4">View log files </h3>
+<div class="outline-text-3" id="text-1_4">
+
+
+<p>
+The log files are stored in <code>/tmp</code>, e.g.
+</p>
+
+
+
+<pre class="src src-sh">$ tail -F /tmp/find_links_1.log
+</pre>
+
+
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2">Website </h2>
+<div class="outline-text-2" id="text-2">
+
+
+
+</div>
+
+<div id="outline-container-2_1" class="outline-3">
+<h3 id="sec-2_1">Restart thin servers </h3>
+<div class="outline-text-3" id="text-2_1">
+
+
+
+
+
+<pre class="src src-sh">$ sudo /sbin/service thin restart
+</pre>
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-2_2" class="outline-3">
+<h3 id="sec-2_2">Restart nginx </h3>
+<div class="outline-text-3" id="text-2_2">
+
+
+
+
+
+<pre class="src src-sh">$ sudo /sbin/service nginx restart
+</pre>
+
+
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-3" class="outline-2">
+<h2 id="sec-3">More info </h2>
+<div class="outline-text-2" id="text-3">
+
+
+<p>
+See <a href="./configuration.html">configuration</a> for more information on what's configured where.
+</p>
+<p>
+See <a href="./background-processes.html">background processes</a> for more information on the background
+processes and how they are configured.
+</p></div>
+</div>
+<div id="postamble">
+</div>
+</div>
+</body>
+</html>

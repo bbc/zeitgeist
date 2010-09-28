@@ -1,0 +1,83 @@
+<% host = "localhost" %>
+:twitter_track:
+  :host: <%= host %>
+  :adapter: bunny
+  :name: twitter.track
+
+:twitter_filtered:
+  :host: <%= host %>
+  :adapter: bunny
+  :name: twitter.filtered
+
+:twitter_sample_raw:
+  :host: <%= host %>
+  :adapter: bunny
+  :name: twitter.sample.raw
+
+:twitter_sample:
+  :host: <%= host %>
+  :adapter: bunny
+  :name: twitter.sample
+
+:twitter_sample_split:
+  :host: <%= host %>
+  :adapter: bunny
+  :name: twitter.sample.split
+
+:twitter_sample_stripped:
+  :host: <%= host %>
+  :adapter: bunny
+  :name: twitter.sample.stripped
+
+:twitter_links:
+  :host: <%= host %>
+  :adapter: bunny
+  :name: twitter.links
+
+:twitter_links_bbc:
+  :host: <%= host %>
+  :adapter: bunny
+  :name: twitter.links.bbc
+
+:twitter_links_bitly:
+  :host: <%= host %>
+  :adapter: bunny
+  :name: twitter.links.bitly
+
+:twitter_delete:
+  :host: <%= host %>
+  :adapter: bunny
+  :name: twitter.delete
+
+:twitter_links_unresolved:
+  :host: <%= host %>
+  :adapter: bunny
+  :name: twitter.links.unresolved
+
+:twitter_command:
+  :host: <%= host %>
+  :adapter: bunny
+  :name: twitter.delete
+
+:report:
+  :host: <%= host %>
+  :adapter: bunny
+  :name: report.twitter
+
+:tee:
+  :host: <%= host %>
+  :adapter: bunny
+  :name: report.tee
+
+:error:
+  :adapter: StdioAdapter
+
+:readline:
+  :adapter: ReadlineAdapter
+
+:stdio:
+  :adapter: StdioAdapter
+
+:null:
+  :adapter: NullAdapter
+

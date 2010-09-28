@@ -1,0 +1,11 @@
+#!/bin/bash
+BASE_DIR=`dirname $0`
+cd $BASE_DIR/..
+
+if [ -n "$1" ]; then
+    host=$1
+else
+    host=$(hostname)
+fi
+
+ruby -ryaml -e "c=YAML::load(File.read('smq_config/groups_${host}.yml')); puts c[:groups].join(' ')"

@@ -1,0 +1,22 @@
+#
+# delete_tweets.yml
+#
+# Delete tweets
+#
+# To load:
+#     sudo scripts/bpload.rb bluepill_config/delete_tweets.yml
+#
+:group: delete_tweets
+:deploy:
+- rad0407
+:tempdir: /tmp
+:logdir: /tmp
+:processes:
+- :name: delete_tweets
+  :count: 4
+  :cmd:
+    :smq: delete_tweets
+  :args:
+    :input: twitter_delete
+    :output: null
+    :enable_reporting: ""

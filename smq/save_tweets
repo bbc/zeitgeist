@@ -1,0 +1,34 @@
+# -*- mode: ruby; -*-
+# save tweets to database
+## requires
+require LoadPath.app_path("db")
+
+## message processor
+class Processor
+  has :tweet_filename, :init => LoadPath.var_path("bbc_tweets.dat")
+
+  ## save tweet to file
+  def save_to_file(tweet)
+    # use same format as input - i.e. \r separated
+    File.open(tweet_filename, "a") do |file|
+      file.puts tweet.to_json
+      file.puts "\r"
+    end
+  end
+
+  ## save tweet to db
+  def save(tweet)
+    begin
+      Tweet.from_hash(tweet)
+    rescue => e
+      logger.error "Error saving tweet: #{e.to_s}"
+      logger.error tweet.to_json
+    end
+  end
+
+  ## message processing loop
+  def process(tweet)
+    save(tweet)
+    tweet
+  end
+end

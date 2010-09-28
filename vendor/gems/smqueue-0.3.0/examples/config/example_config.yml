@@ -1,0 +1,109 @@
+mq: &default_mq
+  :adapter: StompAdapter
+  :host: localhost
+  :port: 61613
+  :reconnect_delay: 5
+
+:announce:
+  :adapter: SpreadAdapter
+  :channel: 4803@localhost
+  :group:   announce
+
+:scheduler:
+  <<: *default_mq
+  :name: /queue/development.scheduler
+  :reliable: true
+
+:change_events:
+  <<: *default_mq
+  :name: /topic/change_events
+  :reliable: true
+
+:input_stomp:
+  <<: *default_mq
+  :name: /queue/shared
+  :reliable: true
+
+:output_stomp:
+  <<: *default_mq
+  :name: /queue/shared
+  :reliable: true
+
+:gardenhose:
+  :adapter: AMQPAdapter
+  :name: gardenhose
+
+:input:
+  :adapter: AMQPAdapter
+  :name: listener
+  :exchange: multicast
+  :kind: fanout
+
+:output:
+  :adapter: AMQPAdapter
+  :name: listener
+  :exchange: multicast
+  :kind: fanout
+
+:inputb:
+  :adapter: bunny
+  :name: listener
+  :exchange: multicast
+  :kind: fanout
+
+:outputb:
+  :adapter: bunny
+  :name: listener
+  :exchange: multicast
+  :kind: fanout
+
+:readline:
+  :adapter: ReadlineAdapter
+
+:stdio:
+  :adapter: StdioAdapter
+
+:error:
+  :adapter: NullAdapter
+
+:null:
+  :adapter: NullAdapter
+
+:xmpp_pubsub_subscriber:
+  :adapter: XMPPPubSubAdapter
+  :host: localhost.private
+  :service: pubsub
+  :node: pub/updates
+  :anonymous: true
+
+:xmpp_pubsub_publisher:
+  :adapter: XMPPPubSubAdapter
+  :host: localhost.private
+  :service: pubsub
+  :node: pub/updates
+  :jid: pub@localhost.private/pubsub
+  :password: pub
+  :debug: false
+
+:local1:
+  :adapter: StompAdapter
+  :host: localhost
+  :port: 61613
+  :reconnect_delay: 5
+  :name: /topic/local1
+  :reliable: true
+
+:local2:
+  :adapter: StompAdapter
+  :host: localhost
+  :port: 61613
+  :reconnect_delay: 5
+  :name: /topic/local2
+  :reliable: true
+
+:pubsub_relay:
+  :adapter: AMQPAdapter
+  :host: localhost
+  :name: pubsub.relay
+  :exchange: pubsub.relay
+  :kind: queue

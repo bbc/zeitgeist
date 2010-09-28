@@ -1,0 +1,28 @@
+# -*- mode: ruby; -*-
+# passthrough only bbc links
+class Processor
+  # def run
+  #   input_queue.get do |msg|
+  #     tweet = ::JSON.parse(msg.body)
+  #     if links = tweet["resolved_links"]
+  #       if links.size > 0
+  #         bbc_links = links.grep(/\.bbc\.co\.uk/)
+  #         if bbc_links.size > 0
+  #           output_queue.put msg.body
+  #         end
+  #       end
+  #     end
+  #   end
+  # end
+
+  def process(tweet)
+    if links = tweet["resolved_links"]
+      if links.size > 0
+        bbc_links = links.grep(/\.bbc\.co\.uk/)
+        if bbc_links.size > 0
+          tweet
+        end
+      end
+    end
+  end
+end

@@ -1,0 +1,63 @@
+# -*- mode: ruby; -*-
+# expand bit.ly links by querying the bit.ly API
+require 'resolve_link'
+require 'timeout'
+
+class Processor
+  include ResolveLink
+
+  def lookup_long_links(tweets)
+    tweet_map = Hash.new {|h, k| h[k] = [] }
+    tweets.each do |tweet|
+      tweet["links"].each do |link|
+        tweet_map[link] << tweet
+      end
+    end
+    long_urls = resolve_bitly_links(tweet_map.keys)
+    long_urls.each do |short, long|
+      tweet_map[short].each do |tweet|
+        (tweet["long_links"] ||= []) << long
+      end
+    end
+    tweets.select{ |x| x["long_links"]}
+  end
+
+  has :batch_size, :default => 5
+  has :delay, :default => 1
+
+  def run
+    # do x uris at once
+    tweets = []
+    input_queue.get do |msg|
+      counters[:in][input_queue.name] += 1
+      begin
+        tweet = ::JSON.parse(msg.body)
+        if text = tweet["text"]
+          urls = text.scan(RX_URL).uniq
+          if urls.size > 0
+            tweet["links"] = urls.flatten.map{ |url| url.strip }
+            if tweet["links"].size > 0
+              tweets << tweet
+            end
+            if tweets.size >= batch_size
+              begin
+                resolved_tweets = lookup_long_links(tweets)
+                resolved_tweets.each do |tweet|
+                  if tweet["long_links"].size > 0
+                    output_queue.put tweet.to_json
+                    counters[:out][output_queue.name] += 1
+                  end
+                end
+              ensure
+                tweets = []
+                sleep delay
+              end
+            end
+          end
+        end
+      rescue => e
+        logger.error e
+      end
+    end
+  end
+end

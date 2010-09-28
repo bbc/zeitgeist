@@ -1,0 +1,156 @@
+<div class="by_url">
+  <div class="chart clearfix clear">
+    <ol class="chart clear">
+      <% metadata = link.metadata || {} %>
+      <% row_title = metadata["headline"] || metadata["title"] || link.url %>
+      <% counter = chart_counter %>
+      <li class="link">
+        <div class="column span-14 last">
+          <h1 class="url"><a target="_blank" href="<%=h link.url %>"><%=h row_title %></a></h1>
+          <ul class="section">
+            <% if link.media_type && !["news", "html"].include?(link.media_type) && !params["media_type"] %>
+            <% has_media_type = true %>
+            <li class="media_type"><%= zg_link(base_url, format_heading(link.media_type), { :class => :media_type }, { :media_type => link.media_type }) %></li>
+            <% else %>
+            <% has_media_type = false %>
+            <% end %>
+            <% if link.section &&  !params["section"] %>
+            <% if has_media_type %>
+            <span class="delimiter">|</span>
+            <% end %>
+            <li class="section"><%= zg_link(base_url, format_heading(link.section), { :class => :section }, { :section => link.section }) %></li>
+            <% end %>
+          </ul>
+        </div>
+        <div class="column description span-14 clear">
+          <%=h metadata["description"] || "No description available" %>&nbsp;
+        </div>
+        <div class="column">
+          <% if metadata["originalpublicationdate"] %>
+          Published<p class="pubdate"><%= DateFormat.format_date(Date.parse(metadata["originalpublicationdate"])) %></p>
+          <% else %>
+          &nbsp;<p class="pubdate">&nbsp;</p>
+          <% end %>
+        </div>
+        <div class="column last">First tweeted<p class="timeago"><%= TimeAgo.time_ago(link.first_tweeted_at) %></div>
+      </li>
+    </ol>
+  </div>
+
+  <div id="chart_div"><div class="placeholder">Generating chart...</div></div>
+  <div class="by-url-body">
+
+  <% timer("tweets") do %>
+
+  <div class="tweets column span-14">
+    <h3><%= tweets.size %> tweets</h3>
+    <div class="disclaimer">
+      <h4>DISCLAIMER</h4>
+      <p class="disclaimer">Please note that we cannot guarantee the validity of any of
+        these tweets, therefore before publishing or writing about any of
+        these tweets you must check that the source tweet has not been
+        deleted and is still public.</p>
+    </div>
+    <% original_tweets_by_date.each do |date, tweets| %>
+    <h4 class="date"><%= DateFormat.format_date(date) %></h4>
+    <ul class="tweets">
+      <% tweets.each do |tweet| %>
+      <li class="clearfix clear tweet<%= tweet.parent_tweet_twid ? ' retweet' : '' %>">
+        <% tweet_retweets = retweet_map[tweet].sort_by{|x| x.created_at }.reverse %>
+           <div class="tweet clear">
+             <div class="metadata span-4">
+               <% if tweet.screen_name %>
+               <p class="screen_name"><a target="_blank" href="http://www.twitter.com/<%=h tweet.screen_name %>"><%=h tweet.screen_name %></a></p>
+               <% else %>
+               <p class="screen_name">(unknown)</p>
+               <% end %>
+               <p class="date"><%=h DateFormat.format_time(tweet.created_at) %></p>
+             </div>
+             <p class="text span-14"><a class="tweet_link" target="_blank" href="<%= twitter_link(tweet) %>"><%=h(tweet.text).gsub(ResolveLink::RX_URL, '<span class="link-placeholder">[link]</span>') %></a>
+               <% if tweet_retweets.size > 0 %>
+               <span class="retweet_count">(<%= tweet_retweets.size %> retweet<%= tweet_retweets.size == 1 ? '' : 's' %>)</span>
+               <% end %>
+            </p>
+          </div>
+      </li>
+    <% end %>
+    </ul>
+    <% end %>
+  </div>
+
+  <% end %>
+
+  <% timer("sidebar") do %>
+  <div class="sidebar column last prepend-1 span-9 retweets">
+
+    <% if highest_retweets.size > 0 %>
+      <% if highest_retweets.size > 10 %>
+      <%   highest_retweets = highest_retweets[0..9] %>
+      <% end %>
+    <h3>Most retweeted messages</h3>
+    <table>
+      <% highest_retweets.each do |tweet, count| %>
+      <tr>
+        <td class="count"><%= count %></td>
+        <td class="screen_name"><a href="http://www.twitter.com/<%=h tweet.screen_name %>"><%=h tweet.screen_name %></a></td>
+        <td class="date"><%= DateFormat.format_datetime(tweet.created_at) %></td>
+      </tr>
+      <tr>
+        <td>&nbsp;</td>
+        <td colspan="2" class="text"><a class="tweet_link" target="_blank" href="<%= twitter_link(tweet) %>"><%= h(tweet.text).gsub(ResolveLink::RX_URL, '[link]') %></a></td>
+      </tr>
+      <% end %>
+    </table>
+    <% end %>
+
+    <% hashtags = HashTags.hashtags_for_link(link, 2) %>
+    <% if hashtags.size > 0 %>
+    <div class="span-9" class="hashtags">
+      <h3>Hashtags</h3>
+      <table>
+        <% hashtags.each do |word, count| %>
+        <tr><td class="count"><%= count %></td><td><a target="_blank" href="http://twitter.com/#search?q=<%= Rack::Utils.escape(word) %>"><%=h word %></a></td></tr>
+        <% end %>
+      </table>
+    </div>
+    <% end %>
+
+    <% words = HashTags.words_for_link(link, 10) %>
+    <% if words.size > 0 %>
+    <div class="span-9 words">
+      <h3>Words</h3>
+      <% words.each do |word, count| %>
+      <span class="word">
+        <span class="count"><%= count %>:</span>
+        <span><a target="_blank" href="http://twitter.com/#search?q=<%= Rack::Utils.escape(word) %>"><%=h word %></a></span></span>
+      </span>
+      <% end %>
+    </div>
+    <% end %>
+
+  </div>
+
+  <% end %>
+
+  </div>
+
+</div>
+
+<script type="text/javascript" src="http://www.google.com/jsapi"></script>
+<script type="text/javascript">
+  google.load("visualization", "1", {packages:["linechart"]});
+  google.setOnLoadCallback(drawChart);
+  function drawChart() {
+  var data = new google.visualization.DataTable();
+  data.addColumn('string', 'time');
+  data.addColumn('number', 'tweets');
+  data.addRows(<%= grouped_by_hour.size %>);
+
+  <% grouped_by_hour.each_with_index do |row, index| %>
+  data.setValue(<%= index %>, 0, '<%= row[0] %>:00');
+  data.setValue(<%= index %>, 1, <%= row[1] %>);
+  <% end %>
+  var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+  chart.draw(data, {width: 960, height: 240, legend: 'none', title: 'Tweets by hour'});
+  }
+</script>

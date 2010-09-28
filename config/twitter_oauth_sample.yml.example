@@ -1,0 +1,13 @@
+:consumer_key: CONSUMER_KEY
+:consumer_secret: CONSUMER_SECRET
+:access_token: ACCESS_TOKEN
+:token_secret: TOKEN_SECRET
+:host: localhost
+:queue: twitter.sample.raw
+:url: http://stream.twitter.com/1/statuses/sample.json
+# report progress every report_limit tweets
+:report_limit: 1000
+# :delay: 0.01
+# :proxy:
+#   :host: http://proxy.example.com
+#   :port: 80

@@ -1,0 +1,19 @@
+#
+# twitter_sample.yml
+#
+# Read tweets from Twitter sample streaming API and put on message queue.
+#
+# To load:
+#     sudo scripts/bpload.rb bluepill_config/twitter_sample.yml
+#
+:group: twitter_sample
+:deploy:
+- rad0504
+:tempdir: /tmp
+:logdir: /tmp
+:processes:
+- :name: twitter_sample
+  :cmd: ruby smq/twitter_oauth.rb twitter_oauth_sample.yml
+  :args:
+    :output: twitter_sample_raw
+    :enable_reporting: ""

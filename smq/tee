@@ -1,0 +1,42 @@
+# -*- mode: ruby; -*-
+# tee
+require 'timeout'
+
+class Processor
+  has :tee_queue_name, :kind => String # no default
+  has :tee_queue do
+    init do
+      key = :tee
+      if !queue_configuration.key?(key)
+        raise ArgumentError, "Output queue :tee_queue not in config file #{config}"
+      end
+      name = tee_queue_name
+      SMQueue.new(:configuration => queue_configuration[key].merge(:logger => logger, :name => name))
+    end
+  end
+
+  def run
+    input_queue.get do |msg|
+      begin
+        counters[:in][input_queue.name] += 1
+        output_queue.put msg.body
+        counters[:out][output_queue.name] += 1
+
+        #tee_queue.put msg.body
+        #counters[:out][tee_queue.name] += 1
+      rescue => e
+        logger.error e
+      end
+    end
+  end
+end
+
+__END__
+
+- get bridges to send to twitter.stream.raw
+- insert tee between twitter.stream.raw and twitter.sample
+
+or define twitter.sample as fanout exchange
+- so need to stop splitter
+
+(could add tee logic to splitter?)

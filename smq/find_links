@@ -1,0 +1,102 @@
+# -*- mode: ruby; -*-
+# -*- coding: utf-8; -*-
+
+# find links in tweets, resolve them
+# send bit.ly links to twitter_links_bitly queue
+require 'resolve_link'
+require 'timeout'
+
+class Processor
+  include ResolveLink
+  has :tweet_filename, :init => LoadPath.var_path("unresolved-links.dat")
+  # these are all bit.ly services
+  has :dont_resolve, :default => %r{http://(bit\.ly)|(4sq\.com)|(nyti\.ms)|(bbc\.in)}
+
+  has :bitly_queue_name, :kind => String do
+    default { queue_configuration[:twitter_links_bitly][:name] }
+  end
+
+  has :bitly_queue do
+    init do
+      key = :twitter_links_bitly
+      if !queue_configuration.key?(key)
+        raise ArgumentError, "Output queue #{key.inspect} not in config file #{config}"
+      end
+      name = bitly_queue_name
+      SMQueue.new(:configuration => queue_configuration[key].merge(:logger => logger, :name => name))
+    end
+  end
+
+  ## save tweet to file and db
+  def save(tweet)
+    ## save to file
+    # use same format as input - i.e. \r separated
+    File.open(tweet_filename, "a") do |file|
+      file.puts tweet
+      file.puts "\r"
+    end
+  end
+
+  def run
+    input_queue.get do |msg|
+      begin
+        counters[:in][input_queue.name] += 1
+        tweet = ::JSON.parse(msg.body)
+        if text = tweet["text"]
+          # if a retweet, use original text
+          if link_tweet = tweet["retweeted_status"]
+            text = link_tweet["text"]
+          else
+            link_tweet = tweet
+          end
+          # handle twitter shortened links
+          if entities = link_tweet["entities"]
+            urls = entities["urls"].map{ |h|
+              h["expanded_url"] || h["url"]
+            }.compact.uniq
+          else
+            # old-style links embedded in text
+            urls = text.scan(RX_URL).uniq
+          end
+          if urls.size > 0
+            tweet["links"] = urls.flatten.map{ |url| url.strip }
+            # p tweet["links"]
+            tweet["resolved_links"] = tweet["links"].map{ |url|
+              begin
+                if url =~ dont_resolve
+                  # logger.info "Cannot resolve links for this service (#{url}) at the moment"
+                  bitly_queue.put tweet.to_json
+                  counters[:out][bitly_queue.name] += 1
+                  # save(msg.body)
+                  next
+                end
+                case url
+                when /tweetphoto/, /twitpic/, /blip\.fm/
+                  next
+                end
+                Timeout.timeout(3) do
+                  resolve_link(url)
+                end
+              rescue Timeout::Error => e
+                # save(msg.body)
+                ## logging is ~very~ slow
+                # logger.error "#{url} #{e.inspect}"
+                nil
+              rescue => e
+                #save(msg.body)
+                logger.error e
+                nil
+              end
+            }.compact.uniq
+            if tweet["resolved_links"].size > 0
+              output_queue.put tweet.to_json
+              counters[:out][output_queue.name] += 1
+            end
+          end
+        end
+      rescue => e
+        logger.error e
+      end
+    end
+  end
+end

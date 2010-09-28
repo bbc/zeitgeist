@@ -1,0 +1,48 @@
+<html>
+  <head>
+    <title>BBC Zeitgeist</title>
+    <% if false %><link rel="stylesheet" type="text/css" href="/css/reset.css">
+    <link rel="stylesheet" type="text/css" href="/css/grid.css">
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <link rel="stylesheet" type="text/css" href="/css/ff-fix.css">
+    <script type="text/javascript" src="/js/jquery-1.4.2.min.js"></script>
+    <% else %><link rel="stylesheet" type="text/css" href="/css/zg4.css"><% end %>
+    <meta name="Description" content="Zeitgeist is a prototype, developed by BBC Research &amp; Development, to highlight the most shared BBC webpages on Twitter" />
+    <meta name="Section" content="BBC Research &amp; Development" />
+    <meta name="Headline" content="BBC Zeitgeist" />
+  </head>
+  <body>
+    <div id="banner">
+      <div class="header">
+        <h1><a href="<%= admin("/zeitgeist") %>">Zeitgeist</a></h1>
+        <p style="">A prototype from BBC Research &amp; Development</p>
+      </div>
+    </div>
+    <div id="title-container">
+      <div id="title">
+        <h1 class="title">The most shared BBC links on Twitter</h1>
+      </div>
+      <div id="nav" class="clear cm">
+        <div id="nav-bar">
+          <ul id="nav_items">
+            <li class="<%= scope == 'now' ? 'active' : '' %>"><%= zg_link("/zeitgeist", "Last 24 hours", {}, url_params) %></li>
+            <li class="<%= scope == 'by_week' ? 'active' : '' %>"><%= zg_link("/zeitgeist/by_week", "Last 7 days", {}, url_params) %></li>
+            <% if scope == "detail" && link %>
+            <li class="<%= scope == 'detail' ? 'active' : 'hidden' %>"><%= zg_link("/zeitgeist/", "Link details", {}, url_params.merge(:url => link.url)) %></li>
+            <% end %>
+            <li class="feedback <%= scope == 'feedback' ? 'active' : 'hidden' %>"><%= zg_link("/feedback", "Info and Feedback") %></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div id="container">
+      <%= yield %>
+    </div>
+    <div id="footer" class="clear clearfix">
+      <div id="rd-logo">
+        <a href="http://www.bbc.co.uk/rd/"><img src="/images/RandD_tag.png" /></a>
+      </div>
+    </div>
+  </body>
+</html>
+

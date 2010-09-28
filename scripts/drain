@@ -1,0 +1,32 @@
+#!/usr/bin/env ruby
+# drain queue on AMQP host
+require File.join(File.dirname(__FILE__), '../lib/load_paths')
+require 'bunny'
+
+if ARGV.size != 2
+  abort "usage: drain host queue_name"
+end
+
+host = ARGV[0]
+queue = ARGV[1]
+
+loop do
+  begin
+    b = Bunny.new(:host => host)
+    b.start
+    q = b.queue(queue)
+    count = 0
+    while msg = q.pop
+      count += 1
+      if count % 1000 == 0
+        puts count
+      end
+    end
+  rescue Interrupt
+    p [:Interrupt]
+    exit
+  rescue => e
+    p [:exception, e]
+    exit
+  end
+end

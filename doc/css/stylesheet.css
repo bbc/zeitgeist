@@ -1,0 +1,33 @@
+/* css for org-publish */
+html { font-family: serif; font-size: 12pt; }
+.title  { text-align: center; }
+.todo   { color: red; }
+.done   { color: green; }
+.tag    { background-color: #add8e6; font-weight:normal }
+.target { }
+.timestamp { color: #bebebe; }
+.timestamp-kwd { color: #5f9ea0; }
+p.verse { margin-left: 3% }
+pre {
+	 border: 1pt solid #AEBDCC;
+	 background-color: #000000;
+	 padding: 5pt;
+	 font-family: monospace;
+   font-size: 90%;
+   overflow:auto;
+   color: #00C080;
+   font-weight: bold;
+}
+table { border-collapse: collapse; }
+td, th { vertical-align: top; }
+dt { font-weight: bold; }
+div.figure { padding: 0.5em; }
+div.figure p { text-align: center; }
+.linenr { font-size:smaller }
+.code-highlighted {background-color:#000000;}
+.org-info-js_info-navigation { border-style:none; }
+#org-info-js_console-label { font-size:10px; font-weight:bold;
+   white-space:nowrap; }
+.org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+   font-weight:bold; }
+

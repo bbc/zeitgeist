@@ -1,0 +1,239 @@
+#!/usr/bin/env ruby
+# -*- mode: ruby; -*-
+BASE_PATH = File.expand_path(File.join(File.dirname(__FILE__), '..'))
+$:.unshift File.join(BASE_PATH, 'lib')
+
+require 'rubygems'
+require 'smqueue'
+require 'logutil'
+require 'this_method'
+require 'doodle'
+require 'doodle/app'
+require "socket"                # for hostname
+
+HOSTNAME = Socket.gethostname
+
+#ENV['http_proxy'] = "http://www-cache.reith.bbc.co.uk:80"
+ENV['HTTP_PROXY'] = ENV['http_proxy']
+
+require 'thread'
+class ErrorQueue < Queue
+  def get(&block)
+    if block_given?
+      #p [:get, :creating_loop]
+      loop do
+        #p [:get, :in_loop]
+        msg = deq
+        #p [:got_msg, msg]
+        yield(msg)
+      end
+    else
+      deq
+    end
+  end
+  alias :put :enq
+end
+# handle error logging in a separate thread
+
+class Processor < Doodle
+  has :source_file
+  has :name
+  has :input
+  has :output
+  has :error, :default => :error
+  has :input_queue
+  has :output_queue
+  has :error_queue
+  has :queues
+  def do_run
+    if respond_to?(:process)
+      do_process
+    elsif respond_to?(:run)
+      run
+    else
+      raise Exception, "You must define a #run or #process method"
+    end
+  end
+  def do_process
+    input_queue.get do |msg|
+      begin
+        data = YAML::load(msg.body)
+        # TODO: maybe dispatch based on kind of object received, e.g.
+        # Hash, Command, Update, etc.
+        out = process(data)
+        output_queue.put out.to_yaml
+      rescue Object => e
+        error_handler e.to_s, e, caller
+      end
+    end
+
+  end
+  def base_path(*args)
+    File.join(BASE_PATH, *args)
+  end
+  def check_read(*args)
+    file = base_path(*args)
+    File.exist?(file) or raise ArgumentError, "File #{file} does not exist"
+    File.read(file)
+  end
+  def load_config(name)
+    data = check_read('config', name + '.yml')
+    YAML::load(data)
+  end
+
+  def initialize(*a, &b)
+    super
+    if error_queue
+      @log_queue = ErrorQueue.new
+      @logger_thread = Thread.new(@log_queue, error_queue) do |lq, eq|
+        logger.debug "threaded error queue started"
+        lq.get do |msg|
+          eq.put msg
+        end
+      end
+    end
+  end
+
+  def error_handler(msg, exception = nil, backtrace = (exception ? exception.backtrace : nil))
+    if exception
+      exception = {
+        :exception => exception.class.to_s,
+        :message => exception.message,
+        :backtrace => exception.backtrace,
+      }
+    end
+    error_message = {
+      :time => Time.now.utc,
+      :context => {
+        :caller => caller,
+        :hostname => HOSTNAME,
+        :script => {
+          :name => MQP.script_name,
+          :source_file => File.expand_path(__FILE__),
+        },
+        :processor => {
+          :name => name,
+          :source_file => source_file,
+        },
+        :backtrace => backtrace,
+      },
+      :error => msg,
+      :exception => exception,
+    }
+    #p [:error, error_message]
+    begin
+      # we don't want errors in logging to the error queue hold anything up
+      # (we don't seem to need to put this in a separate thread, but it's safer)
+      @log_queue.put error_message.to_yaml
+      #error_queue.put error_message.to_yaml
+    rescue Object => e
+      p e
+    end
+    logger.error error_message.to_yaml
+  end
+end
+
+class MQP < Doodle::App
+  doc "Message Queue Processor launcher"
+  def logger
+    LogUtil.logger
+  end
+
+  filename :processor, :existing => true do
+    doc "name of script implementing queue process (without mqp_ prefix)"
+    from String do |arg|
+      # if script name does not contain / then assume it's stored in script/mqps with the prefix mqp_
+      if arg !~ %r{/}
+        File.join(BASE_PATH, 'script', 'mqps', 'mqp_' + File.basename(arg))
+      else
+        # otherwise, assume a path name to script, so pass through
+        arg
+      end
+    end
+  end
+
+  symbol :input, :default => :stdio, :doc => "name of input queue (default: 'stdio')"
+  symbol :output, :default => :stdio, :doc => "name of output queue (default: 'stdio')"
+  symbol :error, :default => :error, :doc => "name of error queue (default : 'error')"
+
+  filename :config, :existing => true do
+    from String do |arg|
+      File.expand_path(arg)
+    end
+    default File.join(BASE_PATH, 'config', 'message_queue.yml')
+    doc "name of config file (default: #{App.tidy_dir(default)})"
+  end
+
+  string :name, :doc => "used to distinguish log files" do
+    default { "%s_%s" % [File.basename(processor), [input, output].compact.join('_to_')] }
+  end
+  alias :display_name :name
+  filename :logfile do
+    default { File.join(BASE_PATH, 'log', "#{display_name}.log") }
+    doc "name of log file"
+  end
+  symbol :loglevel, :flag => :v, :values => [:error, :warn, :info, :debug] do
+    doc "loglevel - default: info"
+    default do
+      debug ? :debug : :info
+    end
+  end
+  std_flags
+
+  examples [
+            "#{script_name} bridge -i readline -o stdio",
+           ]
+
+
+  def run
+    LogUtil.create_logfile name, logfile, loglevel
+
+    queues = YAML::load(File.read(config))
+
+    if input
+      if !queues.key?(input)
+        raise ArgumentError, "Input queue #{input.inspect} not in config file", caller[-1]
+      end
+    end
+
+    if output
+      if !queues.key?(output)
+        raise ArgumentError, "Output queue #{output.inspect} not in config file", caller[-1]
+      end
+    end
+
+    if error
+      if !queues.key?(error)
+        raise ArgumentError, "Error queue #{error.inspect} not in config file", caller[-1]
+      end
+    end
+
+    logger.info "start processing: #{input} => #{ File.basename(processor, '.rb') } => #{output}"
+    logger.debug self.to_hash.to_yaml
+    input_queue = SMQueue.new(:configuration => queues[input].merge(:logger => logger))
+    output_queue = SMQueue.new(:configuration => queues[output].merge(:logger => logger))
+
+    if queues.key?(error)
+      #p [:creating_error_queue]
+      error_queue = SMQueue.new(:configuration => queues[error].merge(:logger => logger))
+    else
+      #p [:creating_error_queue_nil]
+      error_queue = SMQueue.new(:configuration => { :adapter => :NullAdapter })
+    end
+    logger.info "name: #{name}"
+
+    load(processor)
+    Processor(:source_file => processor,
+              :name => name,
+              :input => input,
+              :output => output,
+              :input_queue => input_queue,
+              :output_queue => output_queue,
+              :error_queue => error_queue,
+              :queues => queues
+              ).do_run
+  end
+end
+if __FILE__ == $0
+  MQP.run
+end

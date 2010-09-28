@@ -1,0 +1,12 @@
+# -*- mode: ruby; -*-
+#
+# Generic bridge processor - just passes on msg.body
+#
+class Processor
+  def run
+    input_queue.get do |msg|
+      # logger.info "MSG: #{msg.body.inspect}"
+      output_queue.put msg.body
+    end
+  end
+end

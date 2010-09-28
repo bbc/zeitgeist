@@ -1,0 +1,6 @@
+:development:
+  :user: zeitgeist
+  :password: password
+  :database: zeitgeist_production
+  :host: localhost
+

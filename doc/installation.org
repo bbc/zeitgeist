@@ -1,0 +1,252 @@
+#+BEGIN_HEADER
+#+TITLE: BBC R&D Zeitgeist: Installation
+#+SETUPFILE: ./setupfile.org
+#+END_HEADER
+
+* Installation
+
+BBC R&D Twitter Zeitgeist is developed on Ubuntu 10.04 and deployed on
+Centos 5.5 64-bit. We have also successfully run it in development on
+Mac OS X 10.5.
+
+The instructions below are for Centos 5.5 but should be
+straightforward to convert to any *nix-style platform.
+
+** Install prerequisites
+*** Mysql 5.x
+
+You'll need mysql 5.x server and client installed:
+
+#+begin_src sh
+$ sudo yum install -y mysql-server
+$ sudo yum install -y mysql mysql-devel
+#+end_src
+
+*** rabbitmq
+
+We won't be using any new features of rabbitmq, so installing from a
+package repository works fine.
+
+**** Centos-specific instructions
+
+You can skip this step if you're running RHEL 5 or Fedora.
+
+You'll need to install the [[http://fedoraproject.org/wiki/EPEL][EPEL]] repository, then install rabbitmq.
+
+#+begin_src sh
+$ sudo rpm -Uvh http://download.fedora.redhat.com/pub/epel/5/i386/epel-release-5-3.noarch.rpm
+#+end_src
+
+Or if behind a proxy:
+
+#+begin_src sh
+$ sudo rpm -Uvh http://download.fedora.redhat.com/pub/epel/5/i386/epel-release-5-3.noarch.rpm --httpproxy proxy.example.com --httpport 80
+#+end_src
+
+Then
+#+begin_src sh
+$ sudo yum update
+#+end_src
+
+**** Install and start rabbitmq
+
+: $ sudo yum install -y rabbitmq-server
+
+Start server
+
+#+begin_src sh
+$ sudo /sbin/service rabbitmq-server start
+
+  Starting rabbitmq-server: SUCCESS
+  rabbitmq-server.
+#+end_src
+
+** Add the zeitgeist user
+#+begin_src sh
+$ sudo /usr/sbin/useradd zeitgeist
+#+end_src
+
+** Install Zeitgeist code base
+
+*** Unpack tarball
+#+begin_src sh
+$ tar zxvf zeitgeist.tar.gz zeitgeist
+#+end_src
+
+*** Install from git
+#+begin_src sh
+$ git clone git@github.com:bbcrd/zeitgeist.git
+#+end_src
+
+** Install ruby gems
+
+*** Required libs
+
+You'll need the following installed before you install the gems:
+
+#+begin_src
+$ sudo yum install -y libxml2-devel libxslt-devel gcc-c++
+#+end_src
+
+*** Install gems using bundler
+
+#+begin_src sh
+$ bundle install
+#+end_src
+
+*** Installing mysql gem
+As we deploy to Centos 5.5 64-bit, we have to install the mysql gem separately:
+**** On 32 bit Centos
+#+begin_src sh
+$ sudo gem install mysql -- --with-mysql-conf=/usr/bin/mysql --with-mysql-lib=/usr/lib/mysql/
+#+end_src
+
+**** On 64bit Centos
+#+begin_src sh
+$ sudo gem install mysql -- --with-mysql-conf=/usr/bin/mysql --with-mysql-lib=/usr/lib64/mysql/
+#+end_src
+
+** Set up database
+
+In mysql:
+
+#+begin_src sql
+mysql> create database zeitgeist_production;
+mysql> grant all on zeitgeist_production.* to 'zeitgeist'@'localhost' identified by 'password';
+#+end_src
+
+** Set up config/database.yml
+
+Copy =config/database.yml.example= to =config/database.yml= and edit
+to suit your installation:
+
+#+begin_src yaml
+  :development:
+    :user: zeitgeist
+    :password: password
+    :database: zeitgeist_production
+    :host: localhost
+#+end_src
+
+** Test database connectivity
+
+#+begin_src sh
+RUBYOPT=-rubygems scripts/console
+#+end_src
+
+Running this command will test that the database connection is
+properly set up and that the web app can load all the libraries it
+requires. It also has the side-effect of initializing the database
+tables.
+
+** Create indexes
+After running app for first time (so tables are created), create the
+indexes.
+
+In the =zeitgeist_production= database, run the following queries:
+
+#+begin_src sql
+mysql> use zeitgeist_production;
+mysql> create unique index idx_links_url on links(url);
+mysql> create index idx_tweets_created_at on tweets(created_at);
+mysql> create index idx_tweet_twid on link_tweets(tweet_twid);
+#+end_src
+
+* Test web app
+
+To test the web app, use:
+
+#+begin_src sh
+  $ thin start -p 7000 -R config.ru
+#+end_src
+
+You should see:
+#+begin_example
+>> Thin web server (v1.2.7 codename No Hup)
+>> Maximum connections set to 1024
+>> Listening on 0.0.0.0:7000, CTRL+C to stop
+#+end_example
+
+If so, you should now be able to visit http://localhost:7000/zeitgeist to see the
+web app. It will be empty until you've been running the pipeline for a while.
+
+Press Ctrl-C to quit.
+
+* Start up Thin and nginx (optional)
+
+If you need to serve up the web app on port 80, you can set up nginx
+to proxy to a number of thin instances.
+
+You will find copies of the the nginx and thin init.d scripts in the
+=./install= directory. If necessary, you can copy these to =/etc/init.d=.
+
+Copy the thin configuration file from =config/zeitgeist.yml.example=
+to =/etc/thin/zeitgeist.yml=.
+
+Copy the nginx configuration file from =config/nginx.conf.example= to
+=/usr/local/nginx/conf/nginx.conf=.
+
+Start up thin:
+#+begin_src sh
+  $ sudo /sbin/service thin start
+#+end_src
+
+Start up nginx:
+#+begin_src sh
+  $ sudo /sbin/service nginx start
+#+end_src
+
+This will make the web app available on port 80 from your local machine.
+
+* Testing pipeline installation
+
+** Testing the pipeline
+
+To test that the pipeline set up is working, you can run the Twitter
+track app to track one or more keywords and display the output on the
+console.
+
+*** Make sure rabbitmq is running
+
+#+begin_src sh
+$ sudo /etc/init.d/rabbitmq-server status
+#+end_src
+or whatever the equivalent command is on your platform.
+
+If it's not running, start it up:
+#+begin_src sh
+$ sudo /etc/init.d/rabbitmq-server start
+#+end_src
+
+*** Start up the Twitter sample app
+
+- Copy =config/mq.yml.example= to =config/mq.yml= and edit to suit
+  your installation (e.g. change rabbitmq host if necessary)
+
+- Copy =config/twitter_oauth_sample.yml.example= to
+  =config/twitter_oauth_sample.yml=
+
+  - Edit it to contain your application OAuth credentials (which you
+    obtain from Twitter - see http://twitter.com/apps/new and
+    http://dev.twitter.com/pages/oauth_faq).
+
+    You may find [[../scripts/twitter_oauth_setup.rb][scripts/twitter_oauth_setup.rb]] ([[http://gist.github.com/524376][original]]) useful to
+    generate your access tokens.
+
+    Note that you'll need a separate account for each Twitter Streaming
+    API you use - we use two accounts in the Zeitgeist app.
+
+- In one terminal, run the app from the command line:
+#+begin_src sh
+  ruby smq/twitter_oauth.rb twitter_oauth_sample.yml
+#+end_src
+
+- In another terminal, start up an smq script to bridge from the
+  output of twitter track to the console:
+
+#+begin_src sh
+  ruby scripts/smq bridge --input twitter_sample
+#+end_src
+
+You should start to see tweets appearing on your console. Use Ctrl-C
+to stop each process.

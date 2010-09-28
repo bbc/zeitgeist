@@ -1,0 +1,21 @@
+#!/usr/bin/env ruby
+# helper script to clear down queues with stalled consumers
+require File.join(File.dirname(__FILE__), '../lib/load_paths')
+require 'bunny'
+
+count = 5000
+
+res = `/usr/sbin/rabbitmqctl list_queues`
+res = res.
+  split(/\n/)[1..-2].
+  map{|line| line.split(/\t/)}.
+  map{|q, items| [q, items.to_i]}.
+  select{|q, items| items > count }
+b = Bunny.new
+b.start
+res.each do |q, items|
+  q = b.queue(q)
+  1.upto(items) do
+    q.pop
+  end
+end

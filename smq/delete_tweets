@@ -1,0 +1,44 @@
+# -*- mode: ruby; -*-
+# delete tweets
+## requires
+require LoadPath.app_path("db")
+
+## message processor
+class Processor
+
+  ## delete tweet by twid, user_id
+  def delete(twid, user_id)
+    begin
+      tweet = Tweet.first(:twid => twid, :user_id => user_id)
+      tweet.destroy! if tweet
+    rescue => e
+      logger.error "Error deleting tweet: #{e.to_s}"
+      logger.error tweet.to_json
+    end
+  end
+
+  ## message processing loop
+  def process(message)
+    # delete message has format
+    # { "delete": { "status": { "id": 1234, "user_id": 3 } } }
+    # { "delete": { "status": { "id": 1091197508, "user_id": 7090232 } }}
+    if cmd = message["delete"]
+      if status = cmd["status"]
+        delete(status["id"], status["user_id"])
+      end
+    end
+    nil
+  end
+
+  def test_process
+    # json = '{ "delete": { "status": { "id": 1091197508, "user_id": 7090232 } }}'
+    json = '{ "delete": { "status": { "id": 3766127984, "user_id": 49615331 } }}'
+    msg = JSON.parse(json)
+    p process(msg)
+  end
+end
+
+if __FILE__ == $0
+  processor = Process.new
+  processor.test_process
+end

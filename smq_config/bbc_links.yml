@@ -1,0 +1,38 @@
+#
+# bbc_links.yml
+#
+# Handle end of pipeline - bbc links, saving and deleting tweets and
+# updating metadata.
+#
+# To load:
+#     sudo scripts/bpload.rb bluepill_config/bbc_links.yml
+#
+:group: bbc_links
+:deploy:
+- rad0504
+:tempdir: /tmp
+:logdir: /tmp
+:processes:
+- :name: filter_to_bbc_links
+  :cmd:
+    :smq: filter_to_bbc_links
+  :args:
+    :input: twitter_links
+    :output: twitter_links_bbc
+    :enable_reporting: ""
+- :name: save_tweets
+  :cmd:
+    :smq: save_tweets
+  :args:
+    :input: twitter_links_bbc
+    :output: null
+    :enable_reporting: ""
+- :name: update_metadata
+  :cmd: ruby smq/update_metadata.rb
+- :name: delete_tweets
+  :cmd:
+    :smq: delete_tweets
+  :args:
+    :input: twitter_delete
+    :output: null
+    :enable_reporting: ""

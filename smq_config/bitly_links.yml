@@ -1,0 +1,31 @@
+#
+# bitly_links.yml
+#
+# Handle bitly links.
+#
+# To load:
+#     sudo scripts/bpload.rb bluepill_config/bitly_links.yml
+#
+:group: bitly_links
+:deploy:
+- rad0407
+- rad0505
+:tempdir: /tmp
+:logdir: /tmp
+:processes:
+- :name: bitly_links
+  :count: 4
+  :cmd:
+    :smq: resolve_bitly_links
+  :args:
+    :input: twitter_links_bitly
+    :output: twitter_links_unresolved
+    :enable_reporting: ""
+- :name: resolve_long_links
+  :count: 12
+  :cmd:
+    :smq: resolve_long_links
+  :args:
+    :input: twitter_links_unresolved
+    :output: twitter_links
+    :enable_reporting: ""

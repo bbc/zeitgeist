@@ -1,0 +1,22 @@
+Doodle grew out of my response to Ruby Quiz 49 - "Lisp
+Game":[http://www.rubyquiz.com/quiz49.html] and is in effect a ~very~
+late entry to the justly renowned Quiz 67 -
+"metakoans":[http://www.rubyquiz.com/quiz67.html]. I learnt a lot from
+the answers to that quiz, in particular Christian Neukirchen's and
+Florian Gross's solutions (though I took a different path). I've also
+been inspired by Ara Howard's traits and attributes libraries.
+
+== Similar and related libraries
+
+* traits[http://www.codeforpeople.com/lib/ruby/traits/]
+* attributes[http://www.codeforpeople.com/lib/ruby/attributes/]
+
+== Thanks
+
+*doodle* is developed using
+BDD[http://en.wikipedia.org/wiki/Behavior_driven_development] with
+RSpec[http://rspec.rubyforge.org/], autotest (part of the
+ZenTest[http://www.zenspider.com/ZSS/Products/ZenTest/] suite) and
+rcov[http://eigenclass.org/hiki.rb?rcov]. Thanks for the fantastic
+tools guys!
+

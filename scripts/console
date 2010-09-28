@@ -1,0 +1,2 @@
+#!/bin/sh
+irb -r scripts/console_helper.rb

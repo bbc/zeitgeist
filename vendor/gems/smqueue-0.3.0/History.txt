@@ -1,0 +1,18 @@
+== 0.3.0 / 2010-02-23
+
+* Don't bump off content-type for STOMP messages (http://github.com/craigw/smqueue/commit/b8ef318190ae0db4e6922bd41f1bc8ecb3b865a9)
+* Added ThreadQueueAdapter
+* Added AMQPAdapter (requires amqp)
+* Added XMPPPubSubAdapter (requires xmpp4r)
+* Added HTTPServer adapter (requires thin)
+
+See examples/config/example_config.yml for examples of how to configure these adapters.
+
+== 0.2.1 / 2009-01-25
+
+* Enable TCP_KEEPALIVE on STOMP sockets
+
+== 0.1.0 / 2008-11-14
+
+* Initial release
+  - for Craig and Rija - enjoy :D

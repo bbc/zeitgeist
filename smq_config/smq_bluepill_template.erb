@@ -1,0 +1,14 @@
+## set up bluepill app
+Bluepill.application(<%=q group %>, :foreground => false) do |app|
+% processes.each do |process|
+  app.process <%=q process[:name] %> do |process|
+    process.working_dir   = <%=q process[:dir] %>
+    process.start_command = <%=q process[:cmd] %>
+    # logs
+    process.stdout        = process.stderr = File.join(<%=q process[:log_dir] %>, <%= q process[:name] %> + ".log")
+    # pid
+    process.pid_file      = File.join(<%=q process[:pid_dir] %>, <%= q process[:name] %> + ".pid")
+    process.daemonize     = true
+  end
+% end
+end

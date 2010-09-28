@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+lang="en" xml:lang="en">
+<head>
+<title>BBC R&D Zeitgeist: Configuration</title>
+<meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2010-09-28 15:42:04 BST"/>
+<meta name="author" content="Sean O'Halpin"/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #add8e6; font-weight:normal }
+  .target { }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top; }
+  dt { font-weight: bold; }
+  div.figure { padding: 0.5em; }
+  div.figure p { text-align: center; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size:smaller }
+  .code-highlighted {background-color:#ffff00;}
+  .org-info-js_info-navigation { border-style:none; }
+  #org-info-js_console-label { font-size:10px; font-weight:bold;
+                               white-space:nowrap; }
+  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                 font-weight:bold; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="css/org.css" />
+<link rel="stylesheet" type="text/css" href="css/norang.css" />
+<link rel="stylesheet" type="text/css" href="css/code.css" />
+<script type="text/javascript">
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+
+</head>
+<body>
+<div id="content">
+
+<h1 class="title">BBC R&amp;D Zeitgeist: Configuration</h1>
+
+<p><div class="HEADER">
+</div>
+</p>
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">Thin config </a></li>
+<li><a href="#sec-2">Nginx config </a></li>
+<li><a href="#sec-3">Database </a>
+<ul>
+<li><a href="#sec-3_1">Example </a></li>
+</ul>
+</li>
+<li><a href="#sec-4">Twitter credentials </a></li>
+<li><a href="#sec-5">Message queue configuration files </a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1">Thin config </h2>
+<div class="outline-text-2" id="text-1">
+
+
+<p>
+Copy from <code>/var/www/webapps/zeitgeist/config/zeitgeist.yml</code> to <code>/etc/thin/zeitgeist.yml</code>.
+</p>
+
+
+
+<pre class="src src-yaml"><span style="color: #87ceff; background-color: #000000;">---</span>
+<span style="color: #dda0dd; background-color: #000000;">pid: </span>tmp/pids/thin.pid
+<span style="color: #dda0dd; background-color: #000000;">rackup: </span>config.ru
+<span style="color: #dda0dd; background-color: #000000;">wait: </span>30
+<span style="color: #dda0dd; background-color: #000000;">timeout: </span>30
+<span style="color: #dda0dd; background-color: #000000;">log: </span>log/thin.log
+<span style="color: #dda0dd; background-color: #000000;">max_conns: </span>1024
+<span style="color: #dda0dd; background-color: #000000;">require: </span>[]
+
+<span style="color: #dda0dd; background-color: #000000;">max_persistent_conns: </span>512
+<span style="color: #dda0dd; background-color: #000000;">environment: </span>production
+<span style="color: #dda0dd; background-color: #000000;">daemonize: </span>true
+<span style="color: #dda0dd; background-color: #000000;">servers: </span>5
+<span style="color: #dda0dd; background-color: #000000;">socket: </span>/tmp/thin.zeitgeist.sock
+<span style="color: #dda0dd; background-color: #000000;">chdir: </span>/var/www/webapps/zeitgeist
+</pre>
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2">Nginx config </h2>
+<div class="outline-text-2" id="text-2">
+
+
+<p>
+Copy from <code>/var/www/webapps/zeitgeist/config/nginx.conf</code> to <code>/usr/local/nginx/conf/nginx.conf</code>.
+</p>
+
+
+
+<pre class="src src-conf"><span style="color: #dda0dd; background-color: #000000;">user</span>  zeitgeist;
+<span style="color: #dda0dd; background-color: #000000;">worker_processes</span>  5;
+
+<span style="color: #dda0dd; background-color: #000000;">error_log</span>  /var/log/nginx.error.log;
+<span style="color: #dda0dd; background-color: #000000;">pid</span>        /var/run/nginx.pid;
+
+<span style="color: #dda0dd; background-color: #000000;">events</span> {
+  <span style="color: #dda0dd; background-color: #000000;">worker_connections</span>  1024;
+<span style="color: #dda0dd; background-color: #000000;">}</span>
+
+<span style="color: #dda0dd; background-color: #000000;">http</span> {
+  <span style="color: #dda0dd; background-color: #000000;">include</span>       mime.types;
+  <span style="color: #dda0dd; background-color: #000000;">default_type</span>  application/octet-stream;
+
+  <span style="color: #dda0dd; background-color: #000000;">log_format</span>    main  <span style="color: #DFDFDF; background-color: #000000;">'$remote_addr - $remote_user [$time_local] $request '</span>
+                      <span style="color: #DFDFDF; background-color: #000000;">'"$status" $body_bytes_sent "$http_referer" '</span>
+                      <span style="color: #DFDFDF; background-color: #000000;">'"$http_user_agent" "$http_x_forwarded_for"'</span>;
+
+  <span style="color: #dda0dd; background-color: #000000;">access_log</span>    /var/log/nginx.access.log  main;
+
+  <span style="color: #dda0dd; background-color: #000000;">sendfile</span>      on;
+
+  <span style="color: #dda0dd; background-color: #000000;">keepalive_timeout</span>  65;
+
+  <span style="color: #87ceff; background-color: #000000;"># </span><span style="color: #87ceff; background-color: #000000;">gzip
+</span>  <span style="color: #dda0dd; background-color: #000000;">gzip</span>              on;
+  <span style="color: #dda0dd; background-color: #000000;">gzip_buffers</span>      16 8k;
+  <span style="color: #dda0dd; background-color: #000000;">gzip_comp_level</span>   6;
+  <span style="color: #dda0dd; background-color: #000000;">gzip_http_version</span> 1.0;
+  <span style="color: #dda0dd; background-color: #000000;">gzip_min_length</span>   0;
+  <span style="color: #dda0dd; background-color: #000000;">gzip_types</span>        text/plain text/css image/x-icon application/x-perl application/x-httpd-cgi;
+  <span style="color: #dda0dd; background-color: #000000;">gzip_vary</span>         on;
+  <span style="color: #dda0dd; background-color: #000000;">gzip_disable</span>      <span style="color: #DFDFDF; background-color: #000000;">"MSIE [1-6]\."</span>;
+
+  <span style="color: #dda0dd; background-color: #000000;">upstream thin_cluster</span> {
+    <span style="color: #dda0dd; background-color: #000000;">server</span> unix:/tmp/thin.zeitgeist.0.sock;
+    <span style="color: #dda0dd; background-color: #000000;">server</span> unix:/tmp/thin.zeitgeist.1.sock;
+    <span style="color: #dda0dd; background-color: #000000;">server</span> unix:/tmp/thin.zeitgeist.2.sock;
+    <span style="color: #dda0dd; background-color: #000000;">server</span> unix:/tmp/thin.zeitgeist.3.sock;
+    <span style="color: #dda0dd; background-color: #000000;">server</span> unix:/tmp/thin.zeitgeist.4.sock;
+  <span style="color: #dda0dd; background-color: #000000;">}</span>
+
+  <span style="color: #dda0dd; background-color: #000000;">server</span> {
+    <span style="color: #dda0dd; background-color: #000000;">listen</span>       80;
+    <span style="color: #dda0dd; background-color: #000000;">server_name</span>  zeitgeist.prototyping.bbc.co.uk;
+
+    <span style="color: #dda0dd; background-color: #000000;">root</span> /var/www/webapps/zeitgeist/public;
+
+    <span style="color: #dda0dd; background-color: #000000;">location ~* \.(ico|css|js|gif|jpe?g|png)(\?[0-9]+)?$</span> {
+        <span style="color: #dda0dd; background-color: #000000;">expires</span> 1d;
+        <span style="color: #dda0dd; background-color: #000000;">gzip</span>    on;
+        <span style="color: #dda0dd; background-color: #000000;">break;</span>
+    <span style="color: #dda0dd; background-color: #000000;">}</span>
+
+    <span style="color: #dda0dd; background-color: #000000;">location /</span> {
+      <span style="color: #87ceff; background-color: #000000;"># </span><span style="color: #87ceff; background-color: #000000;">Uncomment next two lines to password protect public website
+</span>      <span style="color: #87ceff; background-color: #000000;">#</span><span style="color: #87ceff; background-color: #000000;">auth_basic "BBC R&amp;D Prototyping Zeitgeist";
+</span>      <span style="color: #87ceff; background-color: #000000;">#</span><span style="color: #87ceff; background-color: #000000;">auth_basic_user_file /var/www/webapps/zeitgeist/config/passwords;
+</span>
+      <span style="color: #dda0dd; background-color: #000000;">proxy_set_header</span>  X-Real-IP  $remote_addr;
+      <span style="color: #dda0dd; background-color: #000000;">proxy_set_header</span>  X-Forwarded-For $proxy_add_x_forwarded_for;
+      <span style="color: #dda0dd; background-color: #000000;">proxy_set_header</span> Host $http_host;
+      <span style="color: #dda0dd; background-color: #000000;">proxy_redirect</span> off;
+
+      <span style="color: #dda0dd; background-color: #000000;">if (-f $request_filename/index.html)</span> {
+        <span style="color: #dda0dd; background-color: #000000;">rewrite</span> (.*) $1/index.html break;
+      <span style="color: #dda0dd; background-color: #000000;">}</span>
+      <span style="color: #dda0dd; background-color: #000000;">if (-f $request_filename.html)</span> {
+        <span style="color: #dda0dd; background-color: #000000;">rewrite</span> (.*) $1.html break;
+      <span style="color: #dda0dd; background-color: #000000;">}</span>
+      <span style="color: #dda0dd; background-color: #000000;">if (!-f $request_filename)</span> {
+        <span style="color: #dda0dd; background-color: #000000;">proxy_pass</span> http://thin_cluster;
+        <span style="color: #dda0dd; background-color: #000000;">break;</span>
+      <span style="color: #dda0dd; background-color: #000000;">}</span>
+    <span style="color: #dda0dd; background-color: #000000;">}</span>
+
+    <span style="color: #dda0dd; background-color: #000000;">location /admin</span> {
+      <span style="color: #dda0dd; background-color: #000000;">auth_basic</span> <span style="color: #DFDFDF; background-color: #000000;">"BBC R&amp;D Prototyping Zeitgeist"</span>;
+      <span style="color: #dda0dd; background-color: #000000;">auth_basic_user_file</span> /var/www/webapps/zeitgeist/config/passwords;
+
+      <span style="color: #dda0dd; background-color: #000000;">proxy_set_header</span>  X-Real-IP  $remote_addr;
+      <span style="color: #dda0dd; background-color: #000000;">proxy_set_header</span>  X-Forwarded-For $proxy_add_x_forwarded_for;
+      <span style="color: #dda0dd; background-color: #000000;">proxy_set_header</span> Host $http_host;
+      <span style="color: #dda0dd; background-color: #000000;">proxy_redirect</span> off;
+
+      <span style="color: #dda0dd; background-color: #000000;">if (-f $request_filename/index.html)</span> {
+        <span style="color: #dda0dd; background-color: #000000;">rewrite</span> (.*) $1/index.html break;
+      <span style="color: #dda0dd; background-color: #000000;">}</span>
+      <span style="color: #dda0dd; background-color: #000000;">if (-f $request_filename.html)</span> {
+        <span style="color: #dda0dd; background-color: #000000;">rewrite</span> (.*) $1.html break;
+      <span style="color: #dda0dd; background-color: #000000;">}</span>
+      <span style="color: #dda0dd; background-color: #000000;">if (!-f $request_filename)</span> {
+        <span style="color: #dda0dd; background-color: #000000;">proxy_pass</span> http://thin_cluster;
+        <span style="color: #dda0dd; background-color: #000000;">break;</span>
+      <span style="color: #dda0dd; background-color: #000000;">}</span>
+
+    <span style="color: #dda0dd; background-color: #000000;">}</span>
+
+    <span style="color: #dda0dd; background-color: #000000;">error_page</span>   500 502 503 504  /50x.html;
+    <span style="color: #dda0dd; background-color: #000000;">location = /50x.html</span> {
+      <span style="color: #dda0dd; background-color: #000000;">root</span>   html;
+    <span style="color: #dda0dd; background-color: #000000;">}</span>
+  <span style="color: #dda0dd; background-color: #000000;">}</span>
+<span style="color: #dda0dd; background-color: #000000;">}</span>
+</pre>
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-3" class="outline-2">
+<h2 id="sec-3">Database </h2>
+<div class="outline-text-2" id="text-3">
+
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<caption></caption>
+<colgroup><col align="left" /><col align="left" />
+</colgroup>
+<tbody>
+<tr><td>zeitgeist</td><td><code>/var/www/webapps/zeitgeist/config/database.yml</code></td></tr>
+</tbody>
+</table>
+
+
+
+</div>
+
+<div id="outline-container-3_1" class="outline-3">
+<h3 id="sec-3_1">Example </h3>
+<div class="outline-text-3" id="text-3_1">
+
+
+
+
+
+<pre class="src src-yaml"><span style="color: #dda0dd; background-color: #000000;">:development:
+  :user: </span>zeitgeist
+<span style="color: #dda0dd; background-color: #000000;">  :password: </span>password
+<span style="color: #dda0dd; background-color: #000000;">  :database: </span>zeitgeist_production
+<span style="color: #dda0dd; background-color: #000000;">  :host: </span>localhost
+</pre>
+
+
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-4" class="outline-2">
+<h2 id="sec-4">Twitter credentials </h2>
+<div class="outline-text-2" id="text-4">
+
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<caption></caption>
+<colgroup><col align="left" /><col align="left" />
+</colgroup>
+<tbody>
+<tr><td>Sample</td><td><code>/var/www/webapps/zeitgeist/config/twitter_oauth_sample.yml</code></td></tr>
+<tr><td>Track</td><td><code>/var/www/webapps/zeitgeist/config/twitter_oauth_track.yml</code></td></tr>
+</tbody>
+</table>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-5" class="outline-2">
+<h2 id="sec-5">Message queue configuration files </h2>
+<div class="outline-text-2" id="text-5">
+
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<caption></caption>
+<colgroup><col align="left" /><col align="left" />
+</colgroup>
+<tbody>
+<tr><td>Message queues</td><td><code>/var/www/webapps/zeitgeist/config/mq.yml</code></td></tr>
+<tr><td>Message processors</td><td><code>/var/www/webapps/zeitgeist/smq_config/*.yml</code></td></tr>
+<tr><td>Process groups loaded by <code>bg/start all</code></td><td><code>/var/www/webapps/zeitgeist/smq_config/group_$(hostname).yml</code></td></tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+<div id="postamble">
+</div>
+</div>
+</body>
+</html>

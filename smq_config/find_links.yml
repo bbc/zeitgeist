@@ -1,0 +1,24 @@
+#
+# find_links.yml
+#
+# Find and resolve non-bitly links.
+#
+# To load:
+#     sudo scripts/bpload.rb bluepill_config/find_links.yml
+#
+:group: find_links
+:deploy:
+- rad0407
+- rad0504
+- rad0505
+:tempdir: /tmp
+:logdir: /tmp
+:processes:
+- :name: find_links
+  :count: 10
+  :cmd:
+    :smq: find_links
+  :args:
+    :input: twitter_sample_stripped
+    :output: twitter_links
+    :enable_reporting: ""

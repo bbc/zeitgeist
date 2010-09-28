@@ -1,0 +1,33 @@
+#!/usr/bin/env ruby
+# display status of bluepill controlled daemons
+# run as root (e.g. with sudo or rvmsudo)
+if Process.uid != 0
+  abort "Must run as root (e.g. with sudo or rvmsudo)"
+end
+require File.join(File.dirname(__FILE__), '../lib/load_paths')
+require 'systemu'
+status, stdout, stderr = systemu "bluepill status"
+if !stdout.empty?
+  puts stdout
+elsif !stderr.empty?
+  if stderr =~ /You must/
+    lines = stderr.split(/\n/)[1..-2]
+    apps = lines.map{ |line| line.strip.split[1] }
+    output = { }
+    apps.each do |app|
+      status, stdout, stderr = systemu "bluepill #{app} status"
+      output[app] = {
+        :stdout => stdout.reject{ |x| x =~ /^\s*$/},
+        :stderr => stderr.reject{ |x| x =~ /^\s*$/}
+      }
+    end
+    output.keys.sort.each do |app|
+      puts "#{app} ".ljust(40, "-")
+      puts output[app][:stdout]
+      puts output[app][:stderr]
+      puts
+    end
+  else
+    puts stderr
+  end
+end

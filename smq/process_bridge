@@ -1,0 +1,10 @@
+# -*- mode: ruby; -*-
+#
+# Generic bridge processor - just passes through msg
+#
+class Processor
+  def process(msg)
+    # (out["zeitgeist.process"] ||= []) << self.name
+    msg
+  end
+end

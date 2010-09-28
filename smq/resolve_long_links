@@ -1,0 +1,39 @@
+# -*- mode: ruby; -*-
+# resolve long links
+require 'resolve_link'
+require 'timeout'
+
+class Processor
+  include ResolveLink
+  has :timeout, :default => 3
+
+  def run
+    input_queue.get do |msg|
+      counters[:in][input_queue.name] += 1
+      begin
+        tweet = ::JSON.parse(msg.body)
+        if long_links = tweet.delete("long_links")
+          if long_links.size > 0
+            tweet["resolved_links"] = long_links.map{ |url|
+              begin
+                Timeout.timeout(timeout) do
+                  resolve_link(url)
+                end
+              rescue Timeout::Error => e
+                p [:error, e, url]
+              rescue => e
+                p [:error, e, url]
+              end
+            }.compact.map{ |u| u.strip }.reject{ |x| x.empty? }
+            if tweet["resolved_links"].size > 0
+              output_queue.put tweet.to_json
+              counters[:out][output_queue.name] += 1
+            end
+          end
+        end
+      rescue => e
+        logger.error e
+      end
+    end
+  end
+end

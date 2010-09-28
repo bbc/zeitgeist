@@ -1,0 +1,138 @@
+#!/usr/bin/env ruby
+## requires
+require File.join(File.dirname(__FILE__), '../lib/load_paths')
+require 'erb_binding'
+require 'date_format'
+require 'json'
+require 'pp'
+
+if ARGV.size < 1
+  abort "usage: queue_report host"
+end
+
+host = ARGV[0]
+
+## list of queues to report on
+queues = %w[
+          twitter.stripped
+        twitter.filter.bbc
+      twitter.filtered.bbc
+             twitter.track
+         twitter.track.bbc
+            twitter.sample
+      twitter.sample.split
+   twitter.sample.stripped
+       twitter.links.bitly
+  twitter.links.unresolved
+             twitter.links
+         twitter.links.bbc
+            twitter.delete
+]
+
+## def dbg(*args)
+def dbg(*args)
+  return if !$DEBUG
+  if args.size > 1
+    label = args.shift
+    arg = args.first
+    STDERR.puts [label, arg].pretty_inspect
+  else
+    STDERR.puts args.first.pretty_inspect
+  end
+end
+
+## get message backlog counts from rabbitmq
+if ENV["TWITTER_ZEITGEIST_ENV"] == "development"
+  twitter_list_queues = "/usr/sbin/rabbitmqctl -q list_queues name messages consumers 2>&1"
+else
+  twitter_list_queues = "ssh -t #{host} sudo /usr/sbin/rabbitmqctl -q list_queues name messages consumers 2>&1"
+end
+
+text = `#{twitter_list_queues}`
+puts text
+if text.strip == ""
+  exit
+end
+
+## set up queue sort order
+queue_sort_order = { }
+queues.each_with_index { |queue, index|
+  queue_sort_order[queue] = index
+}
+
+## create queue counter initial entries
+queue_counters = Hash[*text.map{|line| n, m, c = line.split; [n, { :queue => n, :message_count => m, :consumer_count => c, :in => 0, :out => 0 }]}.flatten(1)]
+# queue_counters =
+# {
+#   "twitter.links" => { :queue => "twitter.links", :message_count => 0, :consumer_count => 5, :in => 0, :out => 0 },
+#   "twitter.links.bbc" => { :queue => "twitter.links.bbc", :message_count => 0, :consumer_count => 1, :in => 0, :out => 0 },
+# }
+counters_path = LoadPath.var_path("counters")
+counters_files = Dir[File.join(counters_path, "*.json")]
+processes = Hash.new{ |h, k| h[k] = Hash.new }
+
+## add up message counts from process reports
+counters_files.each do |file|
+  #pp [:file, file]
+  report = JSON.parse(File.read(file))
+  dbg :report, report
+  processes[report["hostname"]][report["name"]] = report
+  # STDERR.puts report.pretty_inspect
+  if queue_data = report["data"]
+    # pp [:queue_data, queue_data]
+    if messages_in = queue_data["in"]
+      # pp [:in, messages_in]
+      messages_in.each do |queue, count|
+        if queue_counters[queue]
+          queue_counters[queue][:in] += count.to_i
+        end
+      end
+    end
+    if messages_out = queue_data["out"]
+      # pp [:out, messages_out]
+      messages_out.each do |queue, count|
+        if queue_counters[queue]
+          queue_counters[queue][:out] += count.to_i
+        end
+      end
+    end
+  end
+end
+
+dbg :queue_sort_order, queue_sort_order
+
+pp processes
+
+## cross reference processes to queues
+processes = processes.map{ |host, reports|
+  [
+   host,
+   reports.sort_by {|key, report|
+     key = report["data"]["in"].keys.first
+     p [:key, key]
+     queue_sort_order[key] || 0
+   }
+  ]
+}.sort_by{ |h, r| h }
+
+dbg :processes, processes
+
+dbg :queues, queues
+
+## convert to rows
+rows = queues.map { |queue|
+  res = queue_counters[queue]
+  if res.nil?
+    p [:nil_queue, queue]
+  end
+  res
+}.compact
+dbg :rows, rows
+
+## generate output report
+filename = LoadPath.public_path("admin", "queue_report.html")
+template = File.read(LoadPath.views_path("queue_report.erb"))
+File.open(filename, "w") do |file|
+  file.puts ErbBinding.erb template, :rows => rows, :date => Time.now.utc, :processes => processes
+end
+

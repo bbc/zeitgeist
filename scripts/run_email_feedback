@@ -1,0 +1,4 @@
+#!/bin/sh
+cd /var/www/webapps/zeitgeist
+RUBYOPT=-rubygems /usr/bin/ruby scripts/email-feedback.rb 1>&2
+# */30       *       *       *       *       /var/www/webapps/zeitgeist/scripts/run_email_feedback

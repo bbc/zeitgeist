@@ -1,0 +1,104 @@
+user  zeitgeist;
+worker_processes  5;
+
+error_log  /var/log/nginx.error.log;
+pid        /var/run/nginx.pid;
+
+events {
+  worker_connections  1024;
+}
+
+http {
+  include       mime.types;
+  default_type  application/octet-stream;
+
+  log_format    main  '$remote_addr - $remote_user [$time_local] $request '
+                      '"$status" $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
+
+  access_log    /var/log/nginx.access.log  main;
+
+  sendfile      on;
+
+  keepalive_timeout  65;
+
+  # gzip
+  gzip              on;
+  gzip_buffers      16 8k;
+  gzip_comp_level   6;
+  gzip_http_version 1.0;
+  gzip_min_length   0;
+  gzip_types        text/plain text/css image/x-icon application/x-perl application/x-httpd-cgi;
+  gzip_vary         on;
+  gzip_disable      "MSIE [1-6]\.";
+
+  upstream thin_cluster {
+    server unix:/tmp/thin.zeitgeist.0.sock;
+    server unix:/tmp/thin.zeitgeist.1.sock;
+    server unix:/tmp/thin.zeitgeist.2.sock;
+    server unix:/tmp/thin.zeitgeist.3.sock;
+    server unix:/tmp/thin.zeitgeist.4.sock;
+  }
+
+  server {
+    listen       80;
+    server_name  zeitgeist.prototyping.bbc.co.uk;
+
+    root /var/www/webapps/zeitgeist/public;
+
+    location ~* \.(ico|css|js|gif|jpe?g|png)(\?[0-9]+)?$ {
+        expires 1d;
+        gzip    on;
+        break;
+    }
+
+    location / {
+
+      #auth_basic "BBC R&D Prototyping Zeitgeist";
+      #auth_basic_user_file /var/www/webapps/zeitgeist/config/passwords;
+
+      proxy_set_header  X-Real-IP  $remote_addr;
+      proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header Host $http_host;
+      proxy_redirect off;
+
+      if (-f $request_filename/index.html) {
+        rewrite (.*) $1/index.html break;
+      }
+      if (-f $request_filename.html) {
+        rewrite (.*) $1.html break;
+      }
+      if (!-f $request_filename) {
+        proxy_pass http://thin_cluster;
+        break;
+      }
+    }
+
+    location /admin {
+      auth_basic "BBC R&D Prototyping Zeitgeist";
+      auth_basic_user_file /var/www/webapps/zeitgeist/config/passwords;
+
+      proxy_set_header  X-Real-IP  $remote_addr;
+      proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header Host $http_host;
+      proxy_redirect off;
+
+      if (-f $request_filename/index.html) {
+        rewrite (.*) $1/index.html break;
+      }
+      if (-f $request_filename.html) {
+        rewrite (.*) $1.html break;
+      }
+      if (!-f $request_filename) {
+        proxy_pass http://thin_cluster;
+        break;
+      }
+
+    }
+
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+      root   html;
+    }
+  }
+}

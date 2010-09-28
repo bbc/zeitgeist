@@ -1,0 +1,85 @@
+<div class="info-feedback">
+  <div class="info">
+    <h2>Twitter Zeitgeist</h2>
+
+    <h3>About</h3>
+
+    <p>Zeitgeist is a prototype, developed
+      by <a href="http://www.bbc.co.uk/rd/">BBC Research &amp;
+      Development</a>, to highlight the most shared BBC webpages
+      on <a href="http://www.twitter.com/">Twitter</a>, a digest to
+      link people to the hottest BBC pages. You get a sense of
+      'liveness' in the <%= zg_link("/zeitgeist", "Last 24 hours", {},
+      url_params) %> view or take a broader view of the
+      <%= zg_link("/zeitgeist/by_week", "Last 7 days", {}, url_params) %>.
+
+    <p>Links are ranked by a tweet count (including retweets) for the
+      chosen time period. Categories (e.g Technology, Entertainment,
+      Blogs or iPlayer) are highlighted to give links context and
+      allow deeper navigation. Clicking the <%= zg_link("/zeitgeist/",
+      "Zeitgeist", {}, url_params) %> page title returns you to the
+      top level list.</p>
+
+    <p>Each entry details the page title, category and short description. Media
+      elements such as video or audio slideshows are also displayed as is the date
+      of publication where available. We are unable to show actual tweets as this
+      would require moderation.</p>
+
+    <% if authorized? %>
+
+    <p>For BBC users with log-ins, the 'Link details' page provides a breakdown of
+      the activity data, including a graph of tweets against time,
+      most used hash tags and words, retweeted messages and complete list of
+      unmoderated tweet messages by day.</p>
+
+    <% end %>
+
+    <h3>How the data is generated</h3>
+
+    <p>Using
+      Twitter's <a href="http://dev.twitter.com/pages/streaming_api">Gardenhose
+      and Track APIs</a>, Zeitgeist pulls in tweets containing links
+      to BBC web pages. URLs are resolved, including shortened URLs
+      (such as <a href="http://bit.ly">bit.ly</a>), matching each
+      variant to a single linked page. All tweets and retweets for
+      that page link are combined to calculate a total count, which
+      are then categorised by their URL domain and page meta-data.
+
+    <p>For more information please read the Blog Post. We also welcome
+      our feedback using the form on this page.</p>
+
+  </div>
+  <div class="feedback">
+    <h2>Give us your feedback</h2>
+    <p>Please let us know what you think about Zeitgeist</p>
+    <form action="/feedback" method="POST">
+      <ul>
+        <li>
+          <label>Your name <span class="optional">Optional</span>
+            <input type="text" name="name" value="<%=h feedback.name %>"/>
+          </label>
+          <% feedback.errors[:name].each do |error| %>
+          <p class="error"><%= error %></p>
+          <% end %>
+        </li>
+        <li>
+          <label>Your email address <span class="optional">Optional</span>
+            <input type="text" name="email" value="<%=h feedback.email %>"/>
+          </label>
+          <% feedback.errors[:email].each do |error| %>
+          <p class="error"><%= error %></p>
+          <% end %>
+        </li>
+        <li>
+          <label>Your comments
+            <textarea name="comments"><%=h feedback.comments %></textarea>
+          </label>
+          <% feedback.errors[:comments].each do |error| %>
+          <p class="error"><%= error %></p>
+          <% end %>
+        </li>
+      </ul>
+      <input class="submit" type="submit" value="Send message"/>
+    </form>
+  </div>
+</div>

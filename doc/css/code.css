@@ -1,0 +1,138 @@
+/* css for org-publish */
+pre {
+	 border: 1pt solid #AEBDCC;
+	 background-color: #000000;
+	 padding: 5pt;
+	 font-family: Monaco, monospace;
+/*   font-size: 90%; */
+
+   /* font-size: 100%; */
+   /* line-height: 120%; */
+
+   /* font-size: 9pt; */
+   /* line-height: 11pt; */
+
+   /* font-size: 12pt; */
+   /* line-height: 18pt; */
+
+   font-size: 100%;
+   /* line-height: 18pt; */
+
+
+   overflow:auto;
+   color: #00C080;
+   font-weight: medium;
+
+   font-size: 0.8em;
+
+}
+
+h1, h2, h3, h4, h5, h6 {
+   margin-left: 0;
+   padding-left: 0;
+}
+
+/* .src-sh:before {content: "$ "; } */
+
+.code-highlighted {background-color:#000000; }
+code {
+   color: #404040;
+   font-size: 0.8em;
+}
+
+.org-src-name {
+   font-size: 8pt;
+   padding: 0;
+   margin: 0;
+   padding: 4pt;
+   display: block;
+   /* vertical-align: -16pt; */
+   position: relative;
+   background-color: #F0F0F0;
+   top: 11pt;
+   z-index: 100;
+   align: right;
+}
+
+.target {
+  background-color: white;
+}
+
+h1, h2, h3, h4, h5, h6 {
+   padding-left: 0;
+}
+
+body {
+   /* font-size: 100%; */
+   font-size: 100%;
+   font-family: Georgia;
+  /* font-family: "IM FELL Great Primer"; */
+}
+
+/* for slideshows - doesn't work - infojs makes it visible again... */
+/* h1.title { */
+/*    display: none; */
+/* } */
+
+.note {
+   margin-left: 3em;
+   margin-right: 3em;
+   padding: 1em;
+   padding-top: 0.5em;
+   padding-bottom: 0.5em;
+   border: 1px solid #808080;
+}
+.note:before {
+   content: "Note:";
+   font-size: 80%;
+   font-variant: small-caps;
+
+   /* border: 1px solid black; */
+
+   color: #404040;
+   /* background-color: #FFFFC0; */
+
+   /* background-color: #404040; */
+   color: #FFFFC0;
+
+   /* background-color: #808080; */
+   /* border: 1px solid #808080; */
+
+   color: #404040;
+   /* background-color: #FFFFC0; */
+
+   font-weight: bold;
+
+   padding-right: 3pt;
+   padding-left: 3pt;
+   padding-left: 0pt;
+}
+/* a { color: #404040; text-decoration: none; font-style: italic; } */
+a { color: #404080; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+blockquote {
+   background-color: #E0E0E0;
+   /* padding: 4pt; */
+
+   /* padding-top: 0.2em; */
+   /* padding-bottom: 0.2em; */
+   /* padding-left: 1em; */
+   /* padding-right: 1em; */
+
+   padding-top: 1pt;
+   padding-bottom: 1pt;
+   padding-left: 1em;
+   padding-right: 1em;
+
+
+   font-style: italic;
+}
+
+#table-of-contents li a,
+#table-of-contents li a:hover,
+#table-of-contents li a:visited,
+#table-of-contents li a:hover {
+    border: 0;
+    color: #000000;
+}

@@ -1,0 +1,118 @@
+<div class="page-title">
+  <h2 class="column">
+    <% if params["section"] || params["media_type" ] %>
+      <%= zg_link(base_url, "All", {}, {}) %>&nbsp;&nbsp;>&nbsp;
+      <% if params["section"] %>
+        <%= format_heading(params["section"]) %>
+      <% elsif params["media_type"] %>
+        <%= format_heading(params["media_type"]) %>
+      <% end %>
+    <% else %>
+    All
+    <% end %>
+  </h2>
+  <p class="column ">Last updated: <%= Time.now.strftime("%I:%M %p") %></p>
+</div>
+
+<% if params["section"].nil? %>
+
+<%
+   timer("section-chart") do
+
+   # FIXME: move to helpers
+   # input data looks like this:
+   #   sections = [["one", 600], ["two", 300], ["three", 200]]
+
+   margin = 0
+   gutter = 15
+
+   outer_width = 960 - margin + gutter
+
+   if sections.size > 0
+     outer_bar_width = outer_width / sections.size
+   else
+     outer_bar_width = outer_width
+   end
+
+   inner_bar_width = outer_bar_width - gutter
+   bar_bottom = 100
+   top_margin = 0
+   y_scale = (200 - top_margin - bar_bottom).to_f / (sections.map{|x| x[1]}.max).to_f
+%>
+
+<div id="section-chart">
+  <% sections.each_with_index do |(section, count), index| %>
+  <% left = margin + (index * outer_bar_width) %>
+  <div class="bar" id="sc-<%= index %>" style="left: <%= left %>px; bottom: <%= bar_bottom %>px; height: <%= count * y_scale %>px; width: <%= inner_bar_width %>px"></div>
+  <div class="label" id="label-<%= index %>" style="left: <%= left %>px; top: 103px; height: 3ex; width: <%= inner_bar_width %>px">
+    <%= zg_link(base_url, format_heading(section), { :class => :section }, { :section => section }) %>
+    <div class="total" id="total-<%= index %>"><%= count %> tweets</div>
+  </div>
+  <% end %>
+</div>
+
+<% end %>
+<% end %>
+
+<ul class="clear clearfix column-titles">
+  <li class="column column-title span-3">Tweets</li>
+  <li class="column column-title span-14">Links</li>
+</ul>
+
+<div class="chart clearfix">
+
+<% timer("chart") do %>
+
+<% timer("results") do
+   results = results.to_a
+end %>
+
+<ol class="chart">
+  <% results.each do |row| %>
+  <% metadata = {} %>
+  <% timer("metadata") do %>
+  <%   metadata = row.metadata || {} %>
+  <% end %>
+  <%   row_title = metadata["headline"] || metadata["title"] || row.url %>
+  <li class="link">
+    <% timer("link") do %>
+    <div class="clear total column span-3"><%=h row.total %></div>
+    <div class="column span-14 last">
+      <h1 class="url"><a target="_blank" href="<%=h row.url %>"><%=h row_title %></a></h1>
+      <ul class="section">
+        <% if authorized? %>
+        <li class="info<%= row.url.nil? ? ' warning' : ''%>"><%= zg_link("/zeitgeist/", "Link details", { :class => :info }, url_params.merge(:url => row.url.to_s)) %></li>
+        <% end %>
+        <% if row.media_type && !["news", "html"].include?(row.media_type) && !params["media_type"] %>
+          <% has_media_type = true %>
+        <li class="media_type"><%= zg_link(base_url, format_heading(row.media_type), { :class => :media_type }, { :media_type => row.media_type }) %></li>
+        <% else %>
+          <% has_media_type = false %>
+        <% end %>
+        <% if row.section &&  !params["section"] %>
+          <% if has_media_type %>
+          <span class="delimiter">|</span>
+          <% end %>
+        <li class="section"><%= zg_link(base_url, format_heading(row.section), { :class => :section }, { :section => row.section }) %></li>
+        <% end %>
+      </ul>
+    </div>
+    <div class="column prepend-3 description span-14 clear">
+      <%=h metadata["description"] || "No description available" %>&nbsp;
+    </div>
+    <div class="column">
+      <% if metadata["originalpublicationdate"] %>
+      Published<p class="pubdate"><%= DateFormat.format_date(Date.parse(metadata["originalpublicationdate"])) %></p>
+      <% else %>
+      &nbsp;<p class="pubdate">&nbsp;</p>
+      <% end %>
+    </div>
+    <div class="column last">First tweeted<p class="timeago"><%= TimeAgo.time_ago(row.first_tweeted_at) %></div>
+    <% end %>
+  </li>
+  <% end %>
+</ol>
+
+<% end %>
+
+</div>

@@ -1,0 +1,32 @@
+#
+# splitter.yml
+#
+# Handle front end of pipeline - extract retweeted tweets and strip out unused data.
+#
+# To load:
+#     sudo scripts/bpload.rb bluepill_config/splitter.yml
+#
+:group: splitter
+:deploy:
+- rad0407
+- rad0504
+- rad0505
+:tempdir: /tmp
+:logdir: /tmp
+:processes:
+- :name: splitter
+  :count: 4
+  :cmd:
+    :smq: splitter
+  :args:
+    :input: twitter_sample
+    :output: twitter_sample_split
+    :enable_reporting: ""
+- :name: stripper
+  :count: 4
+  :cmd:
+    :smq: stripper
+  :args:
+    :input: twitter_sample_split
+    :output: twitter_sample_stripped
+    :enable_reporting: ""

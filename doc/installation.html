@@ -1,0 +1,695 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+lang="en" xml:lang="en">
+<head>
+<title>BBC R&D Zeitgeist: Installation</title>
+<meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2010-09-28 15:42:00 BST"/>
+<meta name="author" content="Sean O'Halpin"/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #add8e6; font-weight:normal }
+  .target { }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top; }
+  dt { font-weight: bold; }
+  div.figure { padding: 0.5em; }
+  div.figure p { text-align: center; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size:smaller }
+  .code-highlighted {background-color:#ffff00;}
+  .org-info-js_info-navigation { border-style:none; }
+  #org-info-js_console-label { font-size:10px; font-weight:bold;
+                               white-space:nowrap; }
+  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                 font-weight:bold; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="css/org.css" />
+<link rel="stylesheet" type="text/css" href="css/norang.css" />
+<link rel="stylesheet" type="text/css" href="css/code.css" />
+<script type="text/javascript">
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+
+</head>
+<body>
+<div id="content">
+
+<h1 class="title">BBC R&amp;D Zeitgeist: Installation</h1>
+
+<p><div class="HEADER">
+</div>
+</p>
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">Installation </a>
+<ul>
+<li><a href="#sec-1_1">Install prerequisites </a>
+<ul>
+<li><a href="#sec-1_1_1">Mysql 5.x </a></li>
+<li><a href="#sec-1_1_2">rabbitmq </a></li>
+</ul>
+</li>
+<li><a href="#sec-1_2">Add the zeitgeist user </a></li>
+<li><a href="#sec-1_3">Install Zeitgeist code base </a>
+<ul>
+<li><a href="#sec-1_3_1">Unpack tarball </a></li>
+<li><a href="#sec-1_3_2">Install from git </a></li>
+</ul>
+</li>
+<li><a href="#sec-1_4">Install ruby gems </a>
+<ul>
+<li><a href="#sec-1_4_1">Required libs </a></li>
+<li><a href="#sec-1_4_2">Install gems using bundler </a></li>
+<li><a href="#sec-1_4_3">Installing mysql gem </a></li>
+</ul>
+</li>
+<li><a href="#sec-1_5">Set up database </a></li>
+<li><a href="#sec-1_6">Set up config/database.yml </a></li>
+<li><a href="#sec-1_7">Test database connectivity </a></li>
+<li><a href="#sec-1_8">Create indexes </a></li>
+</ul>
+</li>
+<li><a href="#sec-2">Test web app </a></li>
+<li><a href="#sec-3">Start up Thin and nginx (optional) </a></li>
+<li><a href="#sec-4">Testing pipeline installation </a>
+<ul>
+<li><a href="#sec-4_1">Testing the pipeline </a>
+<ul>
+<li><a href="#sec-4_1_1">Make sure rabbitmq is running </a></li>
+<li><a href="#sec-4_1_2">Start up the Twitter sample app </a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1">Installation </h2>
+<div class="outline-text-2" id="text-1">
+
+
+<p>
+BBC R&amp;D Twitter Zeitgeist is developed on Ubuntu 10.04 and deployed on
+Centos 5.5 64-bit. We have also successfully run it in development on
+Mac OS X 10.5.
+</p>
+<p>
+The instructions below are for Centos 5.5 but should be
+straightforward to convert to any *nix-style platform.
+</p>
+
+</div>
+
+<div id="outline-container-1_1" class="outline-3">
+<h3 id="sec-1_1">Install prerequisites </h3>
+<div class="outline-text-3" id="text-1_1">
+
+
+</div>
+
+<div id="outline-container-1_1_1" class="outline-4">
+<h4 id="sec-1_1_1">Mysql 5.x </h4>
+<div class="outline-text-4" id="text-1_1_1">
+
+
+<p>
+You'll need mysql 5.x server and client installed:
+</p>
+
+
+
+<pre class="src src-sh">$ sudo yum install -y mysql-server
+$ sudo yum install -y mysql mysql-devel
+</pre>
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-1_1_2" class="outline-4">
+<h4 id="sec-1_1_2">rabbitmq </h4>
+<div class="outline-text-4" id="text-1_1_2">
+
+
+<p>
+We won't be using any new features of rabbitmq, so installing from a
+package repository works fine.
+</p>
+<ul>
+<li id="sec-1_1_2_1">Centos-specific instructions <br/>
+
+<p>
+You can skip this step if you're running RHEL 5 or Fedora.
+</p>
+<p>
+You'll need to install the <a href="http://fedoraproject.org/wiki/EPEL">EPEL</a> repository, then install rabbitmq.
+</p>
+
+
+
+<pre class="src src-sh">$ sudo rpm -Uvh http://download.fedora.redhat.com/pub/epel/5/i386/epel-release-5-3.noarch.rpm
+</pre>
+
+
+
+<p>
+Or if behind a proxy:
+</p>
+
+
+
+<pre class="src src-sh">$ sudo rpm -Uvh http://download.fedora.redhat.com/pub/epel/5/i386/epel-release-5-3.noarch.rpm --httpproxy proxy.example.com --httpport 80
+</pre>
+
+
+
+<p>
+Then
+</p>
+
+
+<pre class="src src-sh">$ sudo yum update
+</pre>
+
+
+
+</li>
+</ul>
+<ul>
+<li id="sec-1_1_2_2">Install and start rabbitmq <br/>
+
+<pre class="example">
+$ sudo yum install -y rabbitmq-server
+</pre>
+
+
+<p>
+Start server
+</p>
+
+
+
+<pre class="src src-sh">$ sudo /sbin/service rabbitmq-server start
+
+  Starting rabbitmq-server: SUCCESS
+  rabbitmq-server.
+</pre>
+
+
+
+</li>
+</ul>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-1_2" class="outline-3">
+<h3 id="sec-1_2">Add the zeitgeist user </h3>
+<div class="outline-text-3" id="text-1_2">
+
+
+
+
+<pre class="src src-sh">$ sudo /usr/sbin/useradd zeitgeist
+</pre>
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-1_3" class="outline-3">
+<h3 id="sec-1_3">Install Zeitgeist code base </h3>
+<div class="outline-text-3" id="text-1_3">
+
+
+
+</div>
+
+<div id="outline-container-1_3_1" class="outline-4">
+<h4 id="sec-1_3_1">Unpack tarball </h4>
+<div class="outline-text-4" id="text-1_3_1">
+
+
+
+
+<pre class="src src-sh">$ tar zxvf zeitgeist.tar.gz zeitgeist
+</pre>
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-1_3_2" class="outline-4">
+<h4 id="sec-1_3_2">Install from git </h4>
+<div class="outline-text-4" id="text-1_3_2">
+
+
+
+
+<pre class="src src-sh">$ git clone git@github.com:bbcrd/zeitgeist.git
+</pre>
+
+
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-1_4" class="outline-3">
+<h3 id="sec-1_4">Install ruby gems </h3>
+<div class="outline-text-3" id="text-1_4">
+
+
+
+</div>
+
+<div id="outline-container-1_4_1" class="outline-4">
+<h4 id="sec-1_4_1">Required libs </h4>
+<div class="outline-text-4" id="text-1_4_1">
+
+
+<p>
+You'll need the following installed before you install the gems:
+</p>
+
+
+
+<pre class="src src-nil">nil
+</pre>
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-1_4_2" class="outline-4">
+<h4 id="sec-1_4_2">Install gems using bundler </h4>
+<div class="outline-text-4" id="text-1_4_2">
+
+
+
+
+
+<pre class="src src-sh">$ bundle install
+</pre>
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-1_4_3" class="outline-4">
+<h4 id="sec-1_4_3">Installing mysql gem </h4>
+<div class="outline-text-4" id="text-1_4_3">
+
+<p>As we deploy to Centos 5.5 64-bit, we have to install the mysql gem separately:
+</p><ul>
+<li id="sec-1_4_3_1">On 32 bit Centos <br/>
+
+
+
+<pre class="src src-sh">$ sudo gem install mysql -- --with-mysql-conf=/usr/bin/mysql --with-mysql-lib=/usr/lib/mysql/
+</pre>
+
+
+
+</li>
+</ul>
+<ul>
+<li id="sec-1_4_3_2">On 64bit Centos <br/>
+
+
+
+<pre class="src src-sh">$ sudo gem install mysql -- --with-mysql-conf=/usr/bin/mysql --with-mysql-lib=/usr/lib64/mysql/
+</pre>
+
+
+
+</li>
+</ul>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-1_5" class="outline-3">
+<h3 id="sec-1_5">Set up database </h3>
+<div class="outline-text-3" id="text-1_5">
+
+
+<p>
+In mysql:
+</p>
+
+
+
+<pre class="src src-sql">mysql&gt; <span style="color: #db7093; background-color: #000000;">create</span> <span style="color: #db7093; background-color: #000000;">database</span> zeitgeist_production;
+mysql&gt; <span style="color: #db7093; background-color: #000000;">grant</span> <span style="color: #db7093; background-color: #000000;">all</span> <span style="color: #db7093; background-color: #000000;">on</span> zeitgeist_production.* <span style="color: #db7093; background-color: #000000;">to</span> <span style="color: #DFDFDF; background-color: #000000;">'zeitgeist'</span><span style="color: #dda0dd; background-color: #000000;">@</span><span style="color: #DFDFDF; background-color: #000000;">'localhost'</span> identified <span style="color: #db7093; background-color: #000000;">by</span> <span style="color: #DFDFDF; background-color: #000000;">'password'</span>;
+</pre>
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-1_6" class="outline-3">
+<h3 id="sec-1_6">Set up config/database.yml </h3>
+<div class="outline-text-3" id="text-1_6">
+
+
+<p>
+Copy <code>config/database.yml.example</code> to <code>config/database.yml</code> and edit
+to suit your installation:
+</p>
+
+
+
+<pre class="src src-yaml"><span style="color: #dda0dd; background-color: #000000;">:development:
+  :user: </span>zeitgeist
+<span style="color: #dda0dd; background-color: #000000;">  :password: </span>password
+<span style="color: #dda0dd; background-color: #000000;">  :database: </span>zeitgeist_production
+<span style="color: #dda0dd; background-color: #000000;">  :host: </span>localhost
+</pre>
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-1_7" class="outline-3">
+<h3 id="sec-1_7">Test database connectivity </h3>
+<div class="outline-text-3" id="text-1_7">
+
+
+
+
+
+<pre class="src src-sh"><span style="color: #dda0dd; background-color: #000000;">RUBYOPT</span>=-rubygems scripts/console
+</pre>
+
+
+
+<p>
+Running this command will test that the database connection is
+properly set up and that the web app can load all the libraries it
+requires. It also has the side-effect of initializing the database
+tables.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-1_8" class="outline-3">
+<h3 id="sec-1_8">Create indexes </h3>
+<div class="outline-text-3" id="text-1_8">
+
+<p>After running app for first time (so tables are created), create the
+indexes.
+</p>
+<p>
+In the <code>zeitgeist_production</code> database, run the following queries:
+</p>
+
+
+
+<pre class="src src-sql">mysql&gt; <span style="color: #db7093; background-color: #000000;">use</span> zeitgeist_production;
+mysql&gt; <span style="color: #db7093; background-color: #000000;">create</span> <span style="color: #db7093; background-color: #000000;">unique</span> <span style="color: #db7093; background-color: #000000;">index</span> idx_links_url <span style="color: #db7093; background-color: #000000;">on</span> links(url);
+mysql&gt; <span style="color: #db7093; background-color: #000000;">create</span> <span style="color: #db7093; background-color: #000000;">index</span> idx_tweets_created_at <span style="color: #db7093; background-color: #000000;">on</span> tweets(created_at);
+mysql&gt; <span style="color: #db7093; background-color: #000000;">create</span> <span style="color: #db7093; background-color: #000000;">index</span> idx_tweet_twid <span style="color: #db7093; background-color: #000000;">on</span> link_tweets(tweet_twid);
+</pre>
+
+
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2">Test web app </h2>
+<div class="outline-text-2" id="text-2">
+
+
+<p>
+To test the web app, use:
+</p>
+
+
+
+<pre class="src src-sh">$ thin start -p 7000 -R config.ru
+</pre>
+
+
+
+<p>
+You should see:
+</p>
+
+
+<pre class="example">&gt;&gt; Thin web server (v1.2.7 codename No Hup)
+&gt;&gt; Maximum connections set to 1024
+&gt;&gt; Listening on 0.0.0.0:7000, CTRL+C to stop
+</pre>
+
+
+
+<p>
+If so, you should now be able to visit <a href="http://localhost:7000/zeitgeist">http://localhost:7000/zeitgeist</a> to see the
+web app. It will be empty until you've been running the pipeline for a while.
+</p>
+<p>
+Press Ctrl-C to quit.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-3" class="outline-2">
+<h2 id="sec-3">Start up Thin and nginx (optional) </h2>
+<div class="outline-text-2" id="text-3">
+
+
+<p>
+If you need to serve up the web app on port 80, you can set up nginx
+to proxy to a number of thin instances.
+</p>
+<p>
+You will find copies of the the nginx and thin init.d scripts in the
+<code>./install</code> directory. If necessary, you can copy these to <code>/etc/init.d</code>.
+</p>
+<p>
+Copy the thin configuration file from <code>config/zeitgeist.yml.example</code>
+to <code>/etc/thin/zeitgeist.yml</code>.
+</p>
+<p>
+Copy the nginx configuration file from <code>config/nginx.conf.example</code> to
+<code>/usr/local/nginx/conf/nginx.conf</code>.
+</p>
+<p>
+Start up thin:
+</p>
+
+
+<pre class="src src-sh">$ sudo /sbin/service thin start
+</pre>
+
+
+
+<p>
+Start up nginx:
+</p>
+
+
+<pre class="src src-sh">$ sudo /sbin/service nginx start
+</pre>
+
+
+
+<p>
+This will make the web app available on port 80 from your local machine.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-4" class="outline-2">
+<h2 id="sec-4">Testing pipeline installation </h2>
+<div class="outline-text-2" id="text-4">
+
+
+
+</div>
+
+<div id="outline-container-4_1" class="outline-3">
+<h3 id="sec-4_1">Testing the pipeline </h3>
+<div class="outline-text-3" id="text-4_1">
+
+
+<p>
+To test that the pipeline set up is working, you can run the Twitter
+track app to track one or more keywords and display the output on the
+console.
+</p>
+
+</div>
+
+<div id="outline-container-4_1_1" class="outline-4">
+<h4 id="sec-4_1_1">Make sure rabbitmq is running </h4>
+<div class="outline-text-4" id="text-4_1_1">
+
+
+
+
+
+<pre class="src src-sh">$ sudo /etc/init.d/rabbitmq-server status
+</pre>
+
+
+<p>
+or whatever the equivalent command is on your platform.
+</p>
+<p>
+If it's not running, start it up:
+</p>
+
+
+<pre class="src src-sh">$ sudo /etc/init.d/rabbitmq-server start
+</pre>
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-4_1_2" class="outline-4">
+<h4 id="sec-4_1_2">Start up the Twitter sample app </h4>
+<div class="outline-text-4" id="text-4_1_2">
+
+
+<ul>
+<li>
+Copy <code>config/mq.yml.example</code> to <code>config/mq.yml</code> and edit to suit
+your installation (e.g. change rabbitmq host if necessary)
+
+</li>
+<li>
+Copy <code>config/twitter_oauth_sample.yml.example</code> to
+<code>config/twitter_oauth_sample.yml</code>
+
+<ul>
+<li>
+Edit it to contain your application OAuth credentials (which you
+obtain from Twitter - see <a href="http://twitter.com/apps/new">http://twitter.com/apps/new</a> and
+<a href="http://dev.twitter.com/pages/oauth_faq">http://dev.twitter.com/pages/oauth_faq</a>).
+
+<p>
+You may find <a href="../scripts/twitter_oauth_setup.rb">scripts/twitter_oauth_setup.rb</a> (<a href="http://gist.github.com/524376">original</a>) useful to
+generate your access tokens.
+</p>
+<p>
+Note that you'll need a separate account for each Twitter Streaming
+API you use - we use two accounts in the Zeitgeist app.
+</p>
+</li>
+</ul>
+</li>
+<li>
+In one terminal, run the app from the command line:
+</li>
+</ul>
+
+
+
+
+<pre class="src src-sh">ruby smq/twitter_oauth.rb twitter_oauth_sample.yml
+</pre>
+
+
+
+<ul>
+<li>
+In another terminal, start up an smq script to bridge from the
+output of twitter track to the console:
+
+</li>
+</ul>
+
+
+
+
+<pre class="src src-sh">ruby scripts/smq bridge --input twitter_sample
+</pre>
+
+
+
+<p>
+You should start to see tweets appearing on your console. Use Ctrl-C
+to stop each process.
+</p></div>
+</div>
+</div>
+</div>
+<div id="postamble">
+</div>
+</div>
+</body>
+</html>

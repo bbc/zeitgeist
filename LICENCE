@@ -1,0 +1,38 @@
+All original software contained in this project is subject to the
+following licence:
+
+BBC R&D Twitter Zeitgeist ingests tweets to track links to the BBC websites.
+Copyright (C) 2010 BBC
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+The following open source libraries included in this project have
+their own copyright and licences:
+
+- vendor/gems/doodle-0.2.4
+- vendor/gems/smqueue
+
+The following files are derived from open source libraries and retain
+the copyright and licence of their respective projects:
+
+- lib/em-http-request.rb and lib/em-http-request-client.rb are
+  modified versions of the files from the project
+  http://github.com/igrigorik/em-http-request
+
+- lib/net-http-protocol.rb is a modified version of the file from the
+  Ruby language distribution (http://www.ruby-lang.org)
+
+- lib/qrack/subscription.rb is a modified version of the file from the
+  project http://github.com/celldee/bunny
+

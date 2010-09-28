@@ -1,0 +1,28 @@
+#!/bin/bash
+# start named bluepill process group(s)
+# - the list of groups is defined in smq_config/groups_$(hostname).yml
+
+# change into parent (base) directory
+BASE_DIR=`dirname $0`
+cd $BASE_DIR/..
+
+. bg/check_root
+
+if [ -z "$1" ]; then
+    echo "usage: start_group [all|group_name[, group_name]]"
+    echo e.g.
+    echo "  start_group bridge_bbc bridge_track"
+    exit
+fi
+
+if [ "$1" = "all" ]; then
+    groups=$(bg/get_groups)
+else
+    groups="$@"
+fi
+
+for group in $groups; do
+    echo loading group: $group
+    bg/gen_loader $group
+    bluepill load tmp/$group.pill
+done

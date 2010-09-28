@@ -1,0 +1,13 @@
+#!/bin/bash
+# change into parent (base) directory
+BASE_DIR=`dirname $0`
+cd $BASE_DIR/..
+
+. bg/check_root
+
+groups=$(bg/get_groups)
+echo generating bluepill loaders for: $groups
+for group in $groups
+do
+    bg/gen_loader $group
+done

@@ -1,0 +1,340 @@
+== 0.2.4 / 2009-10-10
+
+- Features:
+  - migrated to gemcutter
+  - Doodle::XML::Element
+    - defines class level #tag method to specify output tag name
+  - obj.to_a - creates a (nested) array of [key, value] pairs
+  - obj.assigned?(:name) returns true if attribute :name has a user-assigned value
+  - obj.default?(:name) returns true if attribute :name has default value
+  - obj.clear!(:name) resets attribute :name to default value
+  - improved error reporting
+  - refactored into separate files
+  - more specs (improved coverage)
+  - fixed some errors in datatypes
+  - fixed bug core-28: cannot set init values from values defined in block
+    - see spec/init_values_in_block_spec.rb for example
+
+== 0.2.3 / 2009-03-06
+
+- Features:
+  - collect can now take multiple types, e.g.
+      has :shapes, :collect => [Circle, Square]
+    or
+      has :shapes, :collect => {:circle => Circle, :square => Square}
+  - to_json and from_json - see http:://doodle.rubyforge.org/doodle-json.html for details
+  - can now specify :must and :from directly in #has params hash, e.g.
+      has :answer, :from => { String => proc {|c| c.to_i } },
+        :must => { "be 42" => proc {|c| c == 42 } }
+  - added #assigned? for attributes, e.g.
+      if obj.assigned?(:name) # => true if @name exists
+  - added key_values:
+      class Foo < Doodle
+        has :name
+        has :count
+      end
+      Foo.new('a', 1).doodle.key_values # => [[:name, "a"], [:count, 1]]
+  - and key_values_without_defaults
+  - added :expand => [false|true] to Doodle::App::Filename - expands path if set to true. Default = false
+  - all specs pass on jruby-1.2.0RC2 and ruby 1.8.7p72
+  - plus more docs + specs
+
+== 0.2.2 / 2009-03-02
+
+- Features:
+  - added obj.doodle.keys method
+  - added more examples to website
+
+== 0.2.1 / 2009-03-02
+
+- Bug fixes:
+  - Doodle::App not displaying help text
+
+== 0.2.0 / 2009-02-08
+- Features:
+  - object.doodle.values for easy access to array of attribute values
+  - object.default?(:name) returns true if :name has default and not been assigned
+  - equality
+    - doodles are equal if both have the same class and values
+  - comparability
+    - defines <=> (so doodles are sortable by default)
+  - XML serialization - require 'doodle/xml'
+    simple XML serialization using Doodle class names as tag
+    names. Works for me. YMMV :)
+    - to_xml
+    - from_xml
+  - reworked website using webby
+
+- Bug fixes:
+  - all specs now pass in ruby 1.8.6, 1.9.1 and JRuby 1.1.6 (1 pending)
+  - renabled String collectors
+
+== 0.1.9 / 2008-08-13
+- Features:
+  - to_hash
+  - doodle do .. end blocks now support #has, #from, #must and
+    #arg_order
+  - will now initialize a setter from a block by calling kind.new if
+    kind is specified and kind is a Doodle or a Proc, e.g.
+
+    class Animal
+      has :species
+    end
+
+    class Barn
+      has :animals, :collect => Animal
+    end
+
+    class Farm
+      has Barn
+    end
+
+    farm = Farm do
+      # this is new - will call Barn.new(&block)
+      barn do
+        animal 'chicken'
+        animal 'pig'
+      end
+    end
+
+    Will not try this for an attribute with :abstract => true
+
+  - attributes now have :doc option
+  - attributes now have :abstract option - will not try to
+    auto-instantiate an object from this class
+  - attributes now have a :readonly attribute - will not allow setting
+    outside initialization
+  - Doodle::Utils
+    - deep_copy(obj)
+    - normalize_keys!(hash, recursive = false, method = :to_sym),
+      optionally recurse into child hashes
+    - symbolize_keys!(hash, recursive = false)
+    - stringify_keys!(hash, recursive = false)
+
+- Experimental:
+  - Doodle::App for handlng command line application options
+  - doodle/datatypes - added more datatypes
+
+- Bug fixes:
+  - fixed reversion in 0.1.8 which enabled full backtrace from within
+    doodle.rb
+  - fixed bug where required attributes defined after attributes with
+    default values were not being validated (had 'break' instead of 'next')
+
+== 0.1.8 / 2008-05-13
+- Features:
+  - now applies instance level conversions (class level #from) to
+    attribute values, e.g.
+
+      class Name < String
+        include Doodle::Core
+        from String do |s|
+          Name.new(s)
+        end
+      end
+
+      class Person < Doodle
+        has Name
+      end
+
+      person = Person 'Arthur'
+      person.name.class         # => Name
+
+  - better error reporting
+  - kind can now take an array of classes or modules to match against,
+  - e.g.
+
+      has :name, :kind => [String, Symbol]
+
+    - kind with no args now returns an array of kinds (possibly empty)
+
+- Bug fixes:
+  - #has with class param was not enforcing :kind constraint
+  - moved more methods into DoodleInfo. You should now access metadata
+    via:
+    - obj.doodle.attributes
+    - obj.doodle.conversions
+    - obj.doodle.validations
+    - obj.doodle.parent
+    - obj.doodle.class_attributes
+  - collectors initializing too late when defined at class level
+
+== 0.1.7 / 2008-05-10
+- Features
+  - #has now accepts class constant in name position and generates name
+    and kind from that, e.g.
+      has Person --> has :person, :kind => Person
+      has AudioClip --> has :audio_clip, :kind => AudioClip
+  - moved datatypes code into main doodle.rb
+  - use doodle.parent instead of doodle_parent
+
+- Bug fixes:
+  - fixed handling of :init blocks so they can refer to user supplied
+    attribute values which don't have defaults
+    - note: attributes referred to in :init blocks ~must~ be supplied as
+      keyword arguments - by the time evaluation gets to the
+      initialization block, the :init block has already been evaluated
+      so will raise an error if it cannot find the value it's looking for
+  - moved more methods into DoodleInfo from Core
+
+== 0.1.6 / 2008-05-08
+- Features:
+  - short cut syntax for #must - can now specify constraints like
+    this:
+      must "size > 0"
+      must "self =~ /[A-Z]"
+    which will be evaluated as if you had written this:
+      must "self =~ /[A-Z]" do |v|
+        v.instance_eval("self =~ /[A-Z]")
+      end
+  - prefixed more public but undocumented methods with 'doodle_' to avoid clashing with
+    common names (e.g. parents, attributes, validations, etc.)
+  - renamed Doodle::Attribute Doodle::DoodleAttribute for same reason
+  - updated specs to reflect name changes
+  - attribute level validation messages now denote containing class
+  - major refactoring of #has method - collections now handled by
+    specialized attribute collector classes
+
+- Bug fixes:
+  - can now load keyed collection from hash
+
+== 0.1.5 / 2008-05-06
+- Bug fixes:
+  - fixed bug where defaults were preventing validation working when loading from
+    YAML and added spec
+
+== 0.1.4 / 2008-05-06
+- Features:
+  - keyed collections - see http://doodle.rubyforge.org/#keyed_collections for details
+  - specialized Attribute classes in #has - see
+    spec/specialized_attribute_class_spec.rb for example
+
+- Bug fixes:
+  - fixed bug when using a collect generated method with a type but no arguments
+
+== 0.1.3 / 2008-05-01
+- really avoid wierd interaction with ActiveRecord this time
+- also, managed to get rid of crufty reliance on inspect and found
+  a tidy way to determine singletons :)
+
+== 0.1.2 / 2008-05-01
+- avoid wierd interaction with ActiveRecord (where calling inspect on a
+  class hits the database). Thanks again to Ryan Garver.
+
+== 0.1.1 / 2008-04-28
+- changed name of #parent to #doodle_parent to avoid clash with
+  ActiveSupport (thanks to Ryan Garver for reporting this)
+
+== 0.1.0 / 2008-04-26
+- doodle's first beta version - the API should remain stable from now on
+- created a Google group: http://groups.google.com/group/ruby-doodle
+- major change: changed Doodle from module to class so you now use
+    class Foo < Doodle
+  instead of
+    class Foo < Doodle::Base
+- Doodle::Helper renamed Doodle::Core
+- added #parent method - returns outer object in initialization blocks
+  (see spec/doodle_context_spec for example usage)
+- fixed class and singleton attribute inheritance
+- rake spec now passes all specs with ruby 1.8.6, ruby 1.9.0 and JRuby 1.1.1
+- added more specs
+- added lib/doodle/utils.rb (used by examples)
+- removed (half-hearted) support for 1.8.5
+- removed redundant methods & excised some cruft
+- refactored project to use newgem
+
+== 0.0.11 / 2008-04-13
+- refactored attributes and conversions
+
+== 0.0.10 / 2008-04-13
+- fixed bug with setting class and singleton attributes & added spec
+
+== 0.0.9 / 2008-04-12
+
+- new features:
+  - added Doodle.context and Doodle.parent (only valid during
+    initialization)
+  - use SaveBlock to distinguish between Proc and block args to :init
+  - :collect now creates array by default if no :init specified (thanks to
+    James Adam :)
+  - :collect can now initialize from Enumerables by default
+  - raise UnknownAttributeError if initialize called with unspecified attribute key
+- new examples:
+  - mail example (with gmail smtp support)
+  - Doodle.parent
+  - datatypes
+- new specs for singletons, Doodle.context and Doodle.parent, factory
+- updated docs
+- removed unused code and tidied up
+- bug fixes:
+  - fixed memory leak and provided custom to_yaml and marshal_dump/load
+  - fixed regex for factory methods
+  - fixed bug where validate! was creating instance variables with defaults
+  - fixed errors collection
+  - fixed yaml test for JRuby
+  - don't define factory method if one by same name already defined
+
+== 0.0.8 / 2008-03-25
+
+- renamed rake task upload_gem to publish_gem
+- bumped version and updated todo list
+- don't define factory method if one by same name already defined
+- apply validation! to raw instance variables - also, raise Doodle::ValidationError rather than ArgumentError if missing required values
+- tweaked bugs_spec
+- added spec to cover applying conversions to yaml loaded data
+
+== 0.0.7 / 2008-03-22
+
+- return self from validate! (so you can use idiom foo = YAML::load(yaml).validate!)
+
+- fix normalization of keys to symbols in initialize_from_hash
+
+- fix error not allowing nils in :init clause (because can't clone nil)
+
+- allow more than one class in from clause (e.g. from String, Symbol do ... end)
+
+- removed :meta as alias for :singleton_class (conflicts with openuri, facets, etc.)
+
+== 0.0.6 / 2008-03-16
+
+- fixed Rakefile error (wasn't including examples in rdoc)
+
+== 0.0.5 / 2008-03-16
+
+- added collector_spec
+
+- tidied up validation specs
+
+- fixed dumb bug where validations were getting duplicated resulting from using push on the source array. D'oh!
+
+- added Doodle::DoodleInfo.raise_exception_on_error - set to false to have errors collected only
+  without raising an exception (which is the default behaviour)
+  - errors - returns array of error information
+  - clear_errors - clears errors array
+  - this is still a bit rough - work in progress
+
+- fixed problem with init borking when given non-cloneable object (e.g. Fixnum)
+
+- added serialize_spec
+
+- validate! now validates all attributes too by default (no need to use validate!(true) any more)
+
+== 2008-03-15  Sean O'Halpin  <ohalps01@MC-S001853.local>
+
+- added option (all=true|false) to validate! if true, will
+  validate all attributes as well as invoking object level validation
+
+- made validate! public
+
+== 2008-03-12  seano  <sean.ohalpin@gmail.com>
+
+- added init_spec
+
+- tweaked Rakefile (don't run profile by default, fix dcov task)
+
+- allow :collect => :name form for collecting raw
+  objects (i.e. don't do a klass.new(*args) on values)
+
+- use snake_case (from facets) when generating name from class for
+  collect
+

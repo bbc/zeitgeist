@@ -1,0 +1,19 @@
+#
+# twitter_track.yml
+#
+# Read tweets from Twitter filter streaming API and put on message queue.
+#
+# To load:
+#     sudo scripts/bpload.rb bluepill_config/twitter_track.yml
+#
+:group: twitter_track
+:deploy:
+- rad0504
+:tempdir: /tmp
+:logdir: /tmp
+:processes:
+- :name: twitter_track
+  :cmd: ruby smq/twitter_oauth.rb twitter_oauth_track.yml
+  :args:
+    :output: twitter_track
+    :enable_reporting: ""

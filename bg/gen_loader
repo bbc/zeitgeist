@@ -1,0 +1,17 @@
+#!/bin/bash
+#
+# generate bluepill config file
+#
+BASE_DIR=`dirname $0`
+cd $BASE_DIR/..
+
+. bg/check_root
+
+if [ -n "$1" ]; then
+    mkdir -p tmp
+    ruby bg/bpgen.rb smq_config/${1}.yml > tmp/${1}.pill
+else
+    echo usage: bg/gen_loader process_group
+    echo Generate bluepill loader file for process_group
+    echo Process groups are defined in smq_config/\*.yml
+fi

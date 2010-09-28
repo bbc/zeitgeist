@@ -1,0 +1,203 @@
+body {
+    margin: 1em;
+    border-right: 5px solid #bbb;
+    border-bottom: 5px solid #bbb;
+    padding: 0;
+    background: #ddd none repeat scroll 0 0;
+    border: 1px solid #000;
+    margin: 0;
+    padding: 2em;
+    color: #000;
+    font-family: "Bitstream Vera Sans", Verdana, sans-serif;
+    font-size: 85%;
+}
+
+code {
+    color: #00f;
+}
+
+div#content {
+    border: 1px solid #bbb;
+    background: #fff;
+    margin: 0;
+    padding: 2em;
+}
+
+a {
+    /* color: #139; */
+    text-decoration: none;
+    padding: 1px;
+/*    border: 1px solid #e0e0e0; */
+}
+
+a:hover {
+/*    border: 1px solid #000; */
+}
+
+/*
+a:visited {
+    color: #939;
+}
+*/
+
+#table-of-contents {
+    margin: 1em 0;
+    padding: .1em;
+}
+
+#table-of-contents li a,
+#table-of-contents li a:hover,
+#table-of-contents li a:visited,
+#table-of-contents li a:hover {
+    border: 0;
+    /* color: #139; */
+}
+
+div.title {
+    margin: -1em -1em 0;
+    font-size: 200%;
+    font-weight: bold;
+    background: #c0c0c0;
+    color: #fff;
+    padding: .75em 1em;
+    font-family: "BitStream Vera Sans", Verdana;
+    letter-spacing: .1em;
+    /* border-bottom: 4px solid #f00; */
+}
+
+h1 {
+    background: #c0c0c0 none repeat scroll 0 0;
+    color: #fff;
+    font-family: "BitStream Vera Sans", Verdana;
+    font-size: 200%;
+    font-weight: bold;
+    letter-spacing: 0.1em;
+    margin: -1em -1em .2em;
+    padding: 0.75em 1em;
+}
+
+h2 {
+    font-size: 180%;
+    border-bottom: 1px solid #ccc;
+    padding: .2em;
+}
+
+h3 {
+    font-size: 120%;
+    border-bottom: 1px solid #eee;
+}
+
+h4 {
+    font-size: 110%;
+    border-bottom: 1px solid #eee;
+}
+
+h1, h2, h3, h4, h5, h6 {
+/*    text-transform: capitalize; */
+}
+
+tt {
+    color: #00f;
+}
+
+.verbatim {
+    margin: .5em 0;
+}
+pre {
+    border: 1px solid #ccc;
+    background: #eee;
+    padding: .5em;
+    overflow: auto;
+}
+.verbatim pre {
+    margin: 0;
+}
+.verbatim-caption {
+    border: 1px solid #ccc;
+    border-bottom: 0;
+    background: #fff;
+    display: block;
+    font-size: 80%;
+    padding: .2em;
+}
+
+div#postamble p {
+    text-align: left;
+    color: #888;
+    font-size: 80%;
+    padding: 0;
+    margin: 0;
+}
+
+table {
+    font-size: 100%;
+    border-collapse: collapse;
+    margin: .5em 0;
+}
+
+th, td {
+    border: 1px solid #777;
+    padding: .3em;
+    margin: 2px;
+}
+th {
+    background: #eee;
+}
+
+span.underline {
+    text-decoration: underline;
+}
+
+.fixme {
+    background: #ff0;
+    font-weight: bold;
+}
+.ra {
+    text-align: right;
+}
+
+.sidebar {
+  float: right;
+  width: 25em;
+  background-color: #a02f6c;
+  color: #fff;
+  margin: 2em -2em 2em 2em;
+  padding: 1em;
+}
+.sidebar a {
+  border: none;
+}
+
+.sidebar a:link {
+  /* color: #3ff; */
+}
+.sidebar a:visited {
+  /* color: #3cc; */
+}
+.sidebar a:hover {
+  /* color: #ff6; */
+}
+.sidebar a:active {
+  /* color: #900; */
+}
+
+
+/* Todo List Styles */
+
+.title { text-align: center; }
+.todo  { color: red; }
+.done { color: green; }
+.timestamp { color: gray }
+.timestamp-kwd { color: #f59ea0; }
+.tag { background-color:#add8e6; font-weight:normal }
+.target { background-color: #551a8b; }
+pre {
+       border: 1pt solid #AEBDCC;
+       background-color: #F3F5F7;
+       padding: 5pt;
+       font-family: courier, monospace;
+}
+table { border-collapse: collapse; }
+td, th {
+  vertical-align: top;
+}

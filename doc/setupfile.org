@@ -1,0 +1,6 @@
+#+AUTHOR: Sean O'Halpin
+#+STYLE: <link rel="stylesheet" type="text/css" href="css/org.css" />
+#+STYLE: <link rel="stylesheet" type="text/css" href="css/norang.css" />
+#+STYLE: <link rel="stylesheet" type="text/css" href="css/code.css" />
+#+OPTIONS: ^:{} num:nil toc:3
+#+TODO: TODO(t) BUG(b) HELD(h) BLOCKED(k) | DONE(d) REJECTED(r)

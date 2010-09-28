@@ -1,0 +1,372 @@
+#!/usr/bin/env ruby
+# -*- mode: ruby; -*-
+require File.expand_path(File.join(File.dirname(__FILE__), '../lib/load_paths'))
+require 'smqueue'
+require 'config'
+require 'logutil'
+require 'this_method'
+require 'doodle'
+require 'doodle/app'
+require 'doodle/json'
+require "socket"                # for hostname
+require 'socketutil'            # for local_ip
+
+HOSTNAME = Socket.gethostname
+LOCAL_IP = SocketUtil.local_ip
+
+require 'thread'
+class ErrorQueue < Queue
+  def get(&block)
+    if block_given?
+      #p [:get, :creating_loop]
+      loop do
+        #p [:get, :in_loop]
+        msg = deq
+        #p [:got_msg, msg]
+        yield(msg)
+      end
+    else
+      deq
+    end
+  end
+  alias :put :enq
+end
+
+# handle error logging in a separate thread
+module ErrorHandler
+  def error_handler(msg, exception = nil, backtrace = (exception ? exception.backtrace : nil))
+    if exception
+      if verbose
+        backtrace = exception.backtrace
+      else
+        backtrace = exception.backtrace.reject{ |x| x =~ %r{^/usr/lib/}}
+      end
+      exception_out = {
+        :exception => exception.class.to_s,
+        :message => exception.message,
+        :backtrace => backtrace,
+      }
+    end
+    error_message = {
+      :time => Time.now.utc,
+      :context => {
+        :caller => caller,
+        :hostname => HOSTNAME,
+        :script_runner => {
+          :name => MQP.script_name,
+          :source_file => File.expand_path(__FILE__),
+        },
+        :processor => {
+          :name => name,
+          :source_file => respond_to?(:source_file) ? source_file : nil,
+        },
+        :backtrace => backtrace,
+      },
+      :message => msg,
+      :exception => exception_out,
+    }
+    #p [:error, error_message]
+    begin
+      # we don't want errors in logging to the error queue hold anything up
+      # (we don't seem to need to put this in a separate thread, but it's safer)
+      # @log_queue.put "ERROR: " + exception.message + " at " + exception.backtrace[0]
+
+      logger.error error_message.to_yaml
+    rescue Object => e
+      p [:error_in_error_handler, e]
+    end
+  end
+
+end
+
+class Processor < Doodle
+  BASE_PATH = File.expand_path(File.join(File.dirname(__FILE__), '..'))
+
+  include ErrorHandler
+
+  has :source_file
+  has :name
+  has :input, :default => :readline
+  has :output, :default => :stdio
+  has :error, :default => :error
+  has :input_queue
+  has :output_queue
+  has :error_queue
+  has :report_queue
+  has :reporter_delay, :init => 300 # default = 5 mins
+  has :control_queue
+  has :config
+  has :queue_configuration
+  has :verbose, :default => false
+  has :debug, :default => false
+
+  has :counters do
+    init { counters_init }
+  end
+
+  def counters_init
+    h = Hash.new { |h, k| h[k] = 0 }
+    h.merge({
+              :in => Hash.new { |h, k| h[k] = 0 },
+              :out => Hash.new { |h, k| h[k] = 0 },
+            })
+  end
+
+  def reset_counters
+    self.counters = counters_init
+  end
+
+  def do_run
+    if respond_to?(:process)
+      do_process
+    elsif respond_to?(:run)
+      run
+    else
+      raise Exception, "You must define a #run or #process method"
+    end
+  end
+
+  def report(data)
+    msg = {
+      :time => Time.now.utc,
+      :data => data,
+      :hostname => HOSTNAME,
+      :ip_addr => LOCAL_IP,
+      :name => name,
+    }
+    msg_json = msg.to_json
+    report_queue.put msg_json
+    logger.info msg_json
+  end
+
+  def start_reporter
+    @reporter = Thread.new {
+      logger.info "started reporter"
+      loop do
+        sleep reporter_delay
+        report counters
+        reset_counters
+      end
+    }
+  end
+
+  def do_process
+    # p [:do_process, :debug, debug, :verbose, verbose]
+    input_queue.get do |msg|
+      begin
+        # ignore blank messages
+        if msg.body.to_s.strip == ""
+          p [:msg_body, msg.body.to_s.strip == "", counters[:in][input_queue.name]]
+          p [:rejected, msg.body[0..10]]
+        else
+          data = ::JSON::parse(msg.body)
+          # p data
+          counters[:in][input_queue.name] += 1
+          # TODO: maybe dispatch based on kind of object received, e.g.
+          # Hash, Command, Update, etc.
+          if out = process(data)
+            output_queue.put out.to_json
+            counters[:out][output_queue.name] += 1
+          end
+        end
+        if verbose
+          if debug
+            p counters
+            p msg
+          end
+        end
+      rescue => e
+        logger.error e
+      end
+    end
+  end
+
+  def base_path(*args)
+    File.join(BASE_PATH, *args)
+  end
+
+  def start_error_handler
+    @log_queue = ErrorQueue.new
+    @logger_thread = Thread.new(@log_queue, error_queue) do |lq, eq|
+      logger.debug "threaded error queue started"
+      lq.get do |msg|
+        eq.put msg
+      end
+    end
+  end
+
+  def initialize(*a, &b)
+    super
+    if error_queue
+      start_error_handler
+    end
+    if report_queue
+      start_reporter
+    end
+  end
+
+end
+
+class MQP < Doodle::App
+  include ErrorHandler
+
+  doc "Message Queue Processor launcher"
+  def logger
+    LogUtil.logger
+  end
+
+  filename :processor do
+    doc "filename of script implementing queue process"
+    from String do |file|
+      if File.exist?(file)
+        file
+      else
+        script_file = File.join("smq", file)
+        if File.exist?(script_file)
+          script_file
+        else
+          raise Doodle::ValidationError, "Processor #{file} must be name of existing filename"
+        end
+      end
+    end
+  end
+
+  symbol :input, :default => :stdio, :doc => "name of input queue (default: 'stdio')"
+  symbol :output, :default => :stdio, :doc => "name of output queue (default: 'stdio')"
+  symbol :error, :default => :error, :doc => "name of error queue (default : 'error')"
+
+  symbol :control, :default => :control, :doc => "name of control queue (default : 'control')"
+  symbol :report, :default => :report, :doc => "name of report queue (default : 'report')"
+
+  string :input_queue_name, :doc => "override input queue name (from config file)" do
+    default { queue_configuration[input][:name] }
+  end
+
+  string :output_queue_name, :doc => "override output queue name (from config file)" do
+    default { queue_configuration[output][:name] }
+  end
+
+  filename :config, :existing => true do
+    from String do |arg|
+      File.expand_path(arg)
+    end
+    default File.join('config', 'mq.yml')
+    doc "name of config file (default: #{App.tidy_dir(default)})"
+  end
+
+  string :name, :doc => "used to identify this processor" do
+    default { "%s_%s" % [File.basename(processor), [input, output].compact.join('_to_')] }
+  end
+  alias :display_name :name
+  filename :logfile do
+    default { File.join('log', "#{display_name}.log") }
+    doc "name of log file"
+  end
+  symbol :loglevel, :flag => :v, :values => [:error, :warn, :info, :debug] do
+    doc "loglevel - default: info"
+    default do
+      debug ? :debug : :info
+    end
+  end
+
+  string :params, :doc => "processor specific parameters (in json format)", :default => "{}"
+  string :group, :doc => "process group name (used in ps display)", :default => "default"
+  boolean :enable_reporting, :default => false, :doc => "enable reporting"
+
+  std_flags
+
+  examples [
+            "#{script_name} bridge -i readline -o stdio",
+           ]
+
+  attr_accessor :queue_configuration
+
+  def init_queue(key, name)
+    queue_configuration[key].merge(:logger => logger, :name => name)
+  end
+
+  def init_system_queue(which, adapter = :NullAdapter)
+    if queue_configuration.key?(which)
+      SMQueue.new(:configuration => queue_configuration[which].merge(:logger => logger))
+    else
+      SMQueue.new(:configuration => { :adapter => adapter })
+    end
+  end
+
+  def run
+    begin
+      LogUtil.create_logfile name, logfile, loglevel
+
+      self.queue_configuration = ConfigHelper.load_from_path(config)
+
+      if input
+        if !queue_configuration.key?(input)
+          raise ArgumentError, "Input queue #{input.inspect} not in config file #{config}", caller[-1]
+        end
+      end
+
+      if output
+        if !queue_configuration.key?(output)
+          raise ArgumentError, "Output queue #{output.inspect} not in config file #{config}", caller[-1]
+        end
+      end
+
+      error_queue   = init_system_queue(error, :StderrAdapter)
+      control_queue = init_system_queue(control)
+      if enable_reporting
+        report_queue  = init_system_queue(report)
+      end
+
+      logger.info "start processing: #{input} => #{ File.basename(processor, '.rb') } => #{output}"
+      logger.info "name: #{name}"
+      logger.debug self.to_hash.to_yaml
+      logger.info "input config: #{input}"
+      logger.info "output config: #{output}"
+      logger.info "input queue name: #{input_queue_name}"
+      logger.info "output queue name: #{output_queue_name}"
+      logger.info "json params: #{params}"
+      processor_options = ::JSON.parse(params)
+      logger.info "parsed params: #{processor_options.inspect}"
+
+      # $0 = "[#{group}] smq #{name}: #{File.basename(processor, '.rb')} [#{input_queue_name}] [#{output_queue_name}]"
+
+      input_queue = SMQueue.new(:configuration => init_queue(input, input_queue_name))
+      output_queue = SMQueue.new(:configuration => init_queue(output, output_queue_name))
+      load(processor)
+      params = {
+        :source_file => processor,
+        :name => name,
+        :input => input,
+        :output => output,
+        :input_queue => input_queue,
+        :output_queue => output_queue,
+        :error_queue => error_queue,
+        :report_queue => report_queue,
+        :control_queue => control_queue,
+        :queue_configuration => queue_configuration,
+        :verbose => verbose,
+        :debug => debug,
+        :config => config
+      }.merge(processor_options)
+      pp params
+      process = Processor(params)
+      process.do_run
+    rescue SignalException => e
+      # "kill $pid"
+      logger.info "Received Signal #{e} - shutting down (#{e.inspect})"
+    rescue Exception => e
+      # error_handler e.to_s, e, caller
+      # p [:here, e.class, e.to_s, e.backtrace]
+      # error_handler e.to_s, e, e.backtrace
+      error_handler e.to_s, e, e.backtrace
+
+      # if we get here with an unhandled error then we should abort the whole process
+      raise
+    end
+  end
+end
+if __FILE__ == $0
+  MQP.run
+end
+
+# TODO: don't rely on Processor's error handler

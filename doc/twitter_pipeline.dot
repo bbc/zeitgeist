@@ -1,0 +1,90 @@
+digraph twitter_inbound_links_pipeline___zeitgeist__ {
+fontname=Helvetica;
+node[fontname=Helvetica];
+edge[fontname=Helvetica];
+label="Twitter inbound links pipeline ('Zeitgeist')";
+// Queues
+q_twitter_stream_filtered[shape="box", label="twitter.stream.filtered"];
+q_twitter_links[shape="box", label="twitter.links"];
+q_twitter_track_bbc[shape="box", label="twitter.track.bbc"];
+q_twitter_links_bbc[shape="box", label="twitter.links.bbc"];
+q_twitter_links_bitly[shape="box", label="twitter.links.bitly"];
+q_unresolved_links[shape="box", label="unresolved.links"];
+q_twitter_stream_raw[shape="box", label="twitter.stream.raw"];
+q_twitter_oob[shape="box", label="twitter.oob"];
+q_twitter_stream_stripped[shape="box", label="twitter.stream.stripped"];
+q_twitter_stream_split[shape="box", label="twitter.stream.split"];
+// Topics
+// Stores
+// Processes
+process_bridge_track_bbc[shape="ellipse", label="bridge_track_bbc"];
+process_update_metadata[shape="ellipse", label="update_metadata"];
+process_stripper[shape="ellipse", label="stripper (4/0/4)"];
+process_save_tweets[shape="ellipse", label="save_tweets"];
+process_collect_feedback[shape="ellipse", label="collect_feedback"];
+process_splitter[shape="ellipse", label="splitter (4/0/4)"];
+process_filter_to_bbc_links[shape="ellipse", label="filter_to_bbc_links"];
+process_twitter_oauth_sample[shape="ellipse", label="twitter_oauth (sample)"];
+process_fix_retweets[shape="ellipse", label="fix_retweets"];
+process_resolve_long_links[shape="ellipse", label="resolve long links (0/20/12)"];
+process_twitter_oauth[shape="ellipse", label="twitter_oauth (track)"];
+process_find_links[shape="ellipse", label="find links (15/15/30)"];
+process_router[shape="ellipse", label="router (4/0/4)"];
+process_delete_tweets[shape="ellipse", label="delete_tweets"];
+process_resolve_bitly_links[shape="ellipse", label="resolve bitly links (4/0/0)"];
+// Webservers
+web_zeitgeist[shape="rectangle", peripheries="2", label="zeitgeist"];
+web_twitter_filter_api[shape="rectangle", peripheries="2", label="Twitter filter API\ntrack=bbc"];
+web_api_bit_ly[shape="rectangle", peripheries="2", label="api.bit.ly"];
+web_twitter_sample_api[shape="rectangle", peripheries="2", label="Twitter sample API"];
+// Databases
+db_zeitgeist[shape="ellipse", peripheries="2", label="zeitgeist DB"];
+// Data / documents
+// Email
+feedback_digest[shape="rectangle", peripheries="1", style="filled", fillcolor="#C0C0F0", label="feedback digest"];
+// User
+recipients[shape="ellipse", peripheries="1", style="filled", fillcolor="#F0C0C0", label="recipients"];
+public[shape="ellipse", peripheries="1", style="filled", fillcolor="#F0C0C0", label="public"];
+// Input
+feedback[shape="rectangle", peripheries="1", style="filled", fillcolor="#C0F0C0", label="feedback"];
+// Connections
+q_twitter_stream_stripped -> process_find_links;
+process_twitter_oauth -> q_twitter_track_bbc;
+process_bridge_track_bbc -> q_twitter_stream_raw;
+db_zeitgeist -> process_update_metadata;
+process_router -> q_twitter_stream_filtered;
+public -> feedback;
+feedback_digest -> recipients;
+q_twitter_links_bitly -> process_resolve_bitly_links;
+process_find_links -> q_twitter_links_bitly;
+q_twitter_stream_filtered -> process_splitter;
+q_twitter_links_bbc -> process_save_tweets;
+process_delete_tweets -> db_zeitgeist;
+process_resolve_bitly_links -> q_unresolved_links;
+process_collect_feedback -> feedback_digest;
+q_twitter_stream_split -> process_stripper;
+q_twitter_track_bbc -> process_bridge_track_bbc;
+web_zeitgeist -> db_zeitgeist;
+db_zeitgeist -> process_collect_feedback;
+process_update_metadata -> db_zeitgeist;
+q_twitter_oob -> process_delete_tweets;
+db_zeitgeist -> process_fix_retweets;
+web_api_bit_ly -> process_resolve_bitly_links;
+process_router -> q_twitter_oob;
+web_twitter_filter_api -> process_twitter_oauth;
+web_twitter_sample_api -> process_twitter_oauth_sample;
+q_twitter_links -> process_filter_to_bbc_links;
+process_splitter -> q_twitter_stream_split;
+q_twitter_stream_raw -> process_router;
+process_stripper -> q_twitter_stream_stripped;
+feedback -> web_zeitgeist;
+process_resolve_bitly_links -> web_api_bit_ly;
+process_twitter_oauth_sample -> q_twitter_stream_raw;
+db_zeitgeist -> web_zeitgeist;
+q_unresolved_links -> process_resolve_long_links;
+process_filter_to_bbc_links -> q_twitter_links_bbc;
+process_save_tweets -> db_zeitgeist;
+process_find_links -> q_twitter_links;
+process_resolve_long_links -> q_twitter_links;
+process_fix_retweets -> db_zeitgeist;
+}

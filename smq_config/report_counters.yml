@@ -1,0 +1,20 @@
+#
+# report_counters.yml
+#
+# Read counters from message processors and save to file system in ./var directory.
+#
+# To load:
+#     sudo scripts/bpload.rb bluepill_config/report_counters.yml
+#
+:group: report_counters
+:deploy:
+- rad0505
+:tempdir: /tmp
+:logdir: /tmp
+:processes:
+- :name: report_counters
+  :cmd:
+    :smq: report_counters
+  :args:
+    :input: report
+

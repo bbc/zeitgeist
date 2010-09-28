@@ -1,0 +1,44 @@
+#+BEGIN_HEADER
+#+TITLE: BBC R&D Zeitgeist: README
+#+SETUPFILE: ./setupfile.org
+#+END_HEADER
+
+* Directory layout
+
+| directory    | description                                                                     |
+|--------------+---------------------------------------------------------------------------------|
+| ./app        | web app files                                                                   |
+| ./app/models | db model files                                                                  |
+| ./bg         | background process management scripts                                           |
+| ./config     | configuration files                                                             |
+| ./doc        | docs                                                                            |
+| ./install    | install scripts                                                                 |
+| ./lib        | shared ruby files                                                               |
+| ./public     | static web files                                                                |
+| ./scripts    | message processor scripts                                                       |
+| ./smq        | message queue processor scripts                                                 |
+| ./smq_config | message queue processor configuration files                                     |
+| ./tmp        | temp files inc. thin pids and auto-generated bluepill loader config files       |
+| ./var        | used for local storage                                                          |
+| ./vendor     | gems that should not be installed with gem (because they contain patches, etc.) |
+| ./views      | web app view templates                                                          |
+
+* Getting started
+
+** Installing
+
+Read [[./installation.org][installation]].
+
+** Cheat sheet
+
+See the [[./runbook.org][runbook]] for the commands you'll need most often.
+
+** Background processes
+
+See [[./background-processes.org][background processes]] for detailed information on the background
+message processors and how to configure them.
+
+** Configuration
+
+See [[./configuration.org][configuration]] for details on configuration.
+

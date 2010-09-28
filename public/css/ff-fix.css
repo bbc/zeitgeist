@@ -1,0 +1,29 @@
+@-moz-document url-prefix() {
+   div.navbar ul.tabnav {
+      padding: 3px 10px 12px 10px;
+      }
+
+   div.navbar ul.tabnav li a {
+      padding-bottom: 6px;
+   }
+}
+
+
+/* Clearing Hack (http://www.positioniseverything.net/easyclearing.html)
+----------------------------------------------- */
+.cm:after
+{
+content: ".";
+display: block;
+height: 0;
+clear: both;
+visibility: hidden;
+}
+.cm {display: inline-table;}
+/* Hides from IE-mac \*/
+* html .cm {height: 1%;}
+.cm {display: block;}
+/* End hide from IE-mac */
+
+/* end of clearing hack */
+

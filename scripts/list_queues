@@ -1,0 +1,2 @@
+#!/bin/sh
+sudo /usr/sbin/rabbitmqctl list_queues | egrep -v "(^Listing queues)|(^\.{3}done)" | sort

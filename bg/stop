@@ -1,0 +1,29 @@
+#!/bin/bash
+# stop named bluepill process group(s)
+# - the list of groups is defined in smq_config/groups_$(hostname).yml
+
+# change into parent (base) directory
+BASE_DIR=`dirname $0`
+cd $BASE_DIR/..
+
+. bg/check_root
+
+if [ -z "$1" ]; then
+    echo "usage: stop_group [all|group_name[, group_name]]"
+    echo e.g.
+    echo "  stop_group bridge_bbc bridge_track"
+    exit
+fi
+
+if [ "$1" = "all" ]; then
+    groups=$(bg/get_groups)
+else
+    groups="$@"
+fi
+
+for p in $groups; do
+    echo stopping [$p]
+    bluepill $p stop
+    sleep 1
+    bluepill $p quit
+done

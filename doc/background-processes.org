@@ -1,0 +1,198 @@
+#+BEGIN_HEADER
+#+TITLE: BBC R&D Zeitgeist: Background processes
+#+SETUPFILE: ./setupfile.org
+#+END_HEADER
+
+* Starting, stopping and restarting all background processes
+
+To start/stop/restart all process groups specified for this host, use:
+#+begin_src sh
+  $ sudo bg/start all
+  $ sudo bg/stop all
+  $ sudo bg/restart all
+#+end_src
+
+* Controlling background processes
+
+The scripts that control process groups are in the =./bg=
+subdirectory.
+
+You should run these scripts as =sudo= from the root directory of the
+project.
+
+** Start all background processes for host
+
+To start up all process groups specified for this host, use:
+#+begin_src sh
+  $ sudo bg/start all
+#+end_src
+
+The list of processes to start is specified in
+=smq_config/groups_<hostname>.yml= where =<hostname>= is the current
+host's name as returned by =hostname=. For example, on =rad0407= the
+file is called =bg/groups_rad0407.yml=.
+
+The format of the file is as follows:
+
+#+begin_src yaml
+:groups:
+- bitly_links
+- find_links
+- splitter
+#+end_src
+
+** Start up a specific process group
+
+To start up a specific process group or groups, use:
+#+begin_src sh
+  $ sudo bg/start <group1> [<group2> ...]
+#+end_src
+
+For example:
+#+begin_src sh
+  $ sudo bg/start bitly_links find_links
+#+end_src
+starts the =bitly_links= and =find_links= process groups.
+
+** Stop process groups
+
+To stop all background processes, use:
+#+begin_src sh
+  $ sudo bg/stop all
+#+end_src
+
+To stop specific process groups, specify the groups. For example:
+#+begin_src sh
+  $ sudo bg/stop bitly_links find_links
+#+end_src
+
+** Restart process groups
+
+To restart all background processes, use:
+#+begin_src sh
+  $ sudo bg/restart all
+#+end_src
+
+To restart specific process groups, specify the groups. For example:
+#+begin_src sh
+  $ sudo bg/restart bitly_links find_links
+#+end_src
+
+* Configuring background processes
+
+The background processes that filter the Twitter stream are run as
+groups of related processes under =bluepill=. These /process groups/
+can be started and stopped as groups.
+
+A process group and the processes which belong to it is defined in its
+=./smq_config/<process_group_name>.yml= configuration file.
+
+** Process group configuration
+
+This the process group configuration for the =bitly_links= process
+group. It contains two process definitions, for the
+=resolve_bitly_links= process and the =resolve_long_links= process:
+
+#+begin_src yaml
+:group: bitly_links
+:deploy:
+- rad0407
+- rad0505
+:tempdir: /tmp
+:logdir: /tmp
+:processes:
+- :name: bitly_links
+  :count: 4
+  :cmd:
+    :smq: resolve_bitly_links
+  :args:
+    :input: bitly
+    :output: unresolved_links
+- :name: resolve_long_links
+  :count: 12
+  :cmd:
+    :smq: resolve_long_links.rb
+  :args:
+    :input: unresolved_links
+    :output: twitter_links
+  :params:
+    :timeout: 5
+#+end_src
+
+The file consists of configuration options for the process group as a
+whole, then the individual process definitions.
+
+The process group options are:
+
+| Key         | Description                               | Example       |
+|-------------+-------------------------------------------+---------------|
+| :group:     | process group name                        | =bitly_links= |
+| :deploy:    | where this script is deployed (info only) |               |
+| :tempdir:   | pid file directory                        | =/tmp=        |
+| :logdir:    | log file directory                        | =/tmp=        |
+| :processes: | List of process definitions               | See below     |
+
+The individual process options are:
+
+| Key     | Description                           | Example       |
+|---------+---------------------------------------+---------------|
+| :name:  | process name - displayed by bg/status | =bitly_links= |
+| :count: | how many processes to start           | 4             |
+| :cmd:   | the command to start                  | See below     |
+| :args:  | command line args                     | See below     |
+
+** Command options
+
+The =:cmd:= option can be either a string containing the full command
+to be executed, e.g.
+
+: :cmd: ruby smq/twitter_oauth.rb twitter_oauth_sample.yml
+
+or an =smq= command. An =smq= command is run using the =scripts/smq=
+script wrapper. The options are:
+
+| :smq:    | specifies which script (in =./smq=) to run           |
+| :args:   | list of keyword args to the =smq= wrapper script     |
+| :params: | list of keyword args to the specific =smq= processor |
+
+*** args
+
+Typically, the =:args= option specifies the input and output queue
+definitions. In the example above, the input queue for the
+=bitly_links= process is =bitly= and the output queue is
+=unresolved_links=.
+
+You can see the full list of =:args:= options by running:
+#+begin_src sh
+  $ scripts/smq --help
+#+end_src
+
+*** queue definitions
+
+Queues are configured in =./config/mq.yml=. The =bitly= queue is
+defined in =config/mq.yml= as:
+
+#+begin_src yaml
+:bitly:
+  :adapter: bunny
+  :name: twitter.links.bitly
+#+end_src
+
+*** params
+
+The =:params:= option is for smq /processor/ specific options. For
+example, the =smq/resolve_long_links.rb= processor has an option to
+set the timeout:
+
+#+begin_src ruby
+class Processor
+  has :timeout, :default => 3
+#+end_src
+
+This is set using the =:params:= option as above.
+
+* Log files
+
+All log files are currently stored in =/tmp=. The directory used is
+specified in each process group definition file in the =./smq_config=
+directory.

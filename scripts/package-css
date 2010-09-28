@@ -1,0 +1,5 @@
+#!/bin/sh
+cd public/css/
+lessc style.less
+cat reset.css grid.css style.css ff-fix.css > zg4.css
+

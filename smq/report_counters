@@ -1,0 +1,26 @@
+require File.join(File.dirname(__FILE__), '../lib/load_paths')
+require 'json'
+require 'pp'
+
+class Processor
+  has :counters_path, :init => LoadPath.var_path("counters")
+
+  def run
+    input_queue.get do |msg|
+      begin
+        report = JSON.parse(msg.body)
+        filename = File.join(counters_path, [report["hostname"], report["name"], "json"].join("."))
+        #p filename
+        file = File.new(filename, "w", 0644)
+        file.flock(File::LOCK_EX)
+        begin
+          file.puts report.to_json
+        ensure
+          file.close
+        end
+      rescue => e
+        p [:exception, e]
+      end
+    end
+  end
+end
