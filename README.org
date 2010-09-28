@@ -1,6 +1,6 @@
 #+BEGIN_HEADER
 #+TITLE: BBC R&D Zeitgeist: README
-#+SETUPFILE: ./setupfile.org
+#+SETUPFILE: ./doc/setupfile.org
 #+END_HEADER
 
 * Directory layout
@@ -27,18 +27,18 @@
 
 ** Installing
 
-Read [[./doc/installation.org][installation]].
+Read [[./zeitgeist/doc/installation.org][installation]].
 
 ** Cheat sheet
 
-See the [[./runbook.org][runbook]] for the commands you'll need most often.
+See the [[./zeitgeist/doc/runbook.org][runbook]] for the commands you'll need most often.
 
 ** Background processes
 
-See [[./doc/background-processes.org][background processes]] for detailed information on the background
+See [[./zeitgeist/doc/background-processes.org][background processes]] for detailed information on the background
 message processors and how to configure them.
 
 ** Configuration
 
-See [[./doc/configuration.org][configuration]] for details on configuration.
+See [[./zeitgeist/doc/configuration.org][configuration]] for details on configuration.
 
