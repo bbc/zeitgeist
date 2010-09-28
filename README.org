@@ -27,7 +27,7 @@
 
 ** Installing
 
-Read [[./installation.org][installation]].
+Read [[./doc/installation.org][installation]].
 
 ** Cheat sheet
 
@@ -35,10 +35,10 @@ See the [[./runbook.org][runbook]] for the commands you'll need most often.
 
 ** Background processes
 
-See [[./background-processes.org][background processes]] for detailed information on the background
+See [[./doc/background-processes.org][background processes]] for detailed information on the background
 message processors and how to configure them.
 
 ** Configuration
 
-See [[./configuration.org][configuration]] for details on configuration.
+See [[./doc/configuration.org][configuration]] for details on configuration.
 
