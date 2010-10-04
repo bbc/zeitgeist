@@ -10,6 +10,7 @@ require 'url_helpers'
 require 'rack/utils'
 require 'url_classifier'
 require 'net-http-protocol'
+require 'config'
 # this is no use - detects £ in utf-8 (\302\243) as iso-8859-2
 #require 'rchardet'
 
@@ -108,20 +109,15 @@ module ResolveLink
   end
 
   # FIXME: move bitly stuff to own module
+  # TODO: config items
+  bitly_config = ConfigHelper.load_config("bitly.yml")
+  BITLY_LOGIN = bitly_config[:login]
+  BITLY_API_KEY = bitly_config[:api_key]
 
   BITLY_API_DOMAIN = "api.bit.ly"
   BITLY_HTTP = HTTP.new(BITLY_API_DOMAIN, 80)
   # BITLY_HTTP.set_debug_output $stderr
-  # TODO: config items
-  BITLY_LOGIN = "bbcrdprotozeitgeist"
-  BITLY_API_KEY = "R_0eebb5dcdfc0af9db66bdc40bb1fe655"
   BITLY_EXPAND_PATH = "/v3/expand"
-
-  #http://bit.ly/dcFMzP
-  #http://bit.ly/cOZqSg
-  #http://bit.ly/9Dgrvl
-  #http://bit.ly/9EwT5M
-  #http://bit.ly/bGws0w
 
   def resolve_bitly_links(uris)
     long_urls = []
