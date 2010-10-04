@@ -36,7 +36,8 @@ module LogUtil
                                                     # :pattern => "%c - %-5l : %m\n"
                                                     :pattern => "[%c] %d - %-5l: %m\n"
                                                     )
-      @logger.add_appenders( Logging::Appenders::Stdout.new( :layout => stdout_layout ) )
+      # @logger.add_appenders( Logging::Appenders::Stdout.new( :layout => stdout_layout ) )
+      @logger.add_appenders( Logging::Appenders::Stderr.new( :layout => stdout_layout ) )
 
       # @logger.add_appenders(
       #                       Logging::Appenders::RollingFile.new(filename,
